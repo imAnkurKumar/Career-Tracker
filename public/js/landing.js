@@ -1,37 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
 
-  if (token) {
-    window.location.href = "/dashboard";
-    return;
-  }
+  //   if (token) {
+  //     window.location.href = "/dashboard";
+  //     return;
+  //   }
 
-  const navSignUpBtn = document.getElementById("navSignUpBtn");
-  const navLoginBtn = document.getElementById("navLoginBtn");
-  const heroSignUpBtn = document.getElementById("heroSignUpBtn");
-  const heroLoginBtn = document.getElementById("heroLoginBtn");
+  // Navbar buttons
+  document.getElementById("jobSeekerBtnNav")?.addEventListener("click", () => {
+    window.location.href = "/signUp";
+  });
 
-  if (navSignUpBtn) {
-    navSignUpBtn.addEventListener("click", () => {
-      window.location.href = "/signUp";
-    });
-  }
+  document.getElementById("recruiterBtnNav")?.addEventListener("click", () => {
+    window.location.href = "/recruiter/signUp";
+  });
 
-  if (heroSignUpBtn) {
-    heroSignUpBtn.addEventListener("click", () => {
-      window.location.href = "/signUp";
-    });
-  }
+  // Hero buttons
+  document.getElementById("jobSeekerBtn")?.addEventListener("click", () => {
+    window.location.href = "/signUp";
+  });
 
-  if (navLoginBtn) {
-    navLoginBtn.addEventListener("click", () => {
-      window.location.href = "/login";
-    });
-  }
-
-  if (heroLoginBtn) {
-    heroLoginBtn.addEventListener("click", () => {
-      window.location.href = "/login";
-    });
-  }
+  document.getElementById("recruiterBtn")?.addEventListener("click", () => {
+    window.location.href = "/recruiter/signUp";
+  });
 });

@@ -6,6 +6,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const userRoutes = require("./routers/user");
+const recruitersRoutes = require("./routers/recrutiters");
 const app = express();
 
 mongoose.set("strictQuery", true);
@@ -18,6 +19,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", userRoutes);
 app.use("/user", userRoutes);
+app.use("/recruiter", recruitersRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)

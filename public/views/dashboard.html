@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Seeker Dashboard - CareerTrack</title>
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="logo">CareerTrack</div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="#" id="viewJobsBtn" data-section="browse-jobs"
+                >🔍 Browse Jobs</a
+              >
+            </li>
+            <li>
+              <a href="#" id="myApplicationsBtn" data-section="my-applications"
+                >📌 My Applications</a
+              >
+            </li>
+            <li>
+              <a href="#" id="profileBtn" data-section="profile">👤 Profile</a>
+            </li>
+            <li><a href="#" id="logoutBtn">🚪 Logout</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <h1 id="sectionTitle">Welcome to CareerTrack!</h1>
+        <div id="dashboardContent">
+          <p>
+            Please select an option from the sidebar to view your information.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+  </body>
+</html>
