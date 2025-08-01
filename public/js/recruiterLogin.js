@@ -15,7 +15,7 @@ document
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        window.location.href = "/recruiter/dashboard";
+        window.location.href = "/views/recruiterDashboard.html";
       } else {
         alert(data.message);
       }

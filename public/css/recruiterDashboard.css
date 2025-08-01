@@ -1,0 +1,398 @@
+/* Base styles - adapted from dashboard.css for consistency */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-blue: #2e86de; /* Slightly different blue for recruiter */
+  --dark-blue: #1f4e79; /* Darker blue for sidebar */
+  --light-gray: #f4f7fc;
+  --medium-gray: #bdc3c7;
+  --text-color: #34495e;
+  --white: #ffffff;
+  --hover-light: #6faee6;
+
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  line-height: 1.6;
+  height: 100vh; /* Ensure body takes full viewport height */
+  overflow: hidden; /* Prevent body from scrolling */
+  display: flex; /* Use flexbox for body to center content vertically */
+  justify-content: center;
+  align-items: center;
+}
+
+.dashboard-container {
+  display: flex;
+  width: calc(100% - 40px); /* Account for 20px margin on each side */
+  height: calc(100vh - 40px); /* Account for 20px margin on top/bottom */
+  box-shadow: var(--shadow-medium);
+  border-radius: var(--border-radius-md);
+  overflow: hidden; /* Important for containing children within rounded corners */
+}
+
+.sidebar {
+  width: 280px;
+  background-color: var(--dark-blue);
+  color: var(--white);
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
+}
+
+.sidebar .logo {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 50px;
+  text-align: center;
+  color: var(--primary-blue);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.sidebar-nav li {
+  margin-bottom: 5px;
+}
+
+.sidebar-nav a {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 1.05rem;
+  padding: 12px 15px;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  font-weight: 600;
+  box-shadow: var(--shadow-light);
+}
+
+.main-content {
+  flex: 1; /* Allow main content to take remaining space */
+  padding: 40px;
+  background-color: var(--white);
+  border-left: 1px solid var(--medium-gray);
+  overflow-y: auto; /* Make main content scrollable independently */
+}
+
+.main-content h1 {
+  font-size: 2.2rem;
+  color: var(--dark-blue);
+  margin-bottom: 25px;
+  font-weight: 800;
+  border-bottom: 2px solid var(--primary-blue);
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+#dashboardContent {
+  margin-top: 30px;
+  padding: 0;
+  border-radius: var(--border-radius-md);
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+
+/* Styling for individual dashboard sections */
+.dashboard-section {
+  background-color: var(--light-gray);
+  padding: 30px;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--medium-gray);
+  margin-bottom: 20px;
+}
+
+.dashboard-section.hidden {
+  display: none;
+}
+
+/* Styles for the form within the dashboard section */
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--white);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-medium);
+}
+
+.form-container h2 {
+  color: var(--dark-blue);
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.input-group input[type="text"],
+.input-group input[type="email"],
+.input-group input[type="password"],
+.input-group textarea,
+.input-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: var(--white);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group textarea:focus,
+.input-group select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(46, 134, 222, 0.2);
+  outline: none;
+}
+
+.form-container button[type="submit"] {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.form-container button[type="submit"]:hover {
+  background-color: var(--hover-light);
+  transform: translateY(-2px);
+}
+
+/* New: Styling for Job Cards */
+.job-card {
+  background-color: var(--white);
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-light);
+  transition: transform 0.2s ease-in-out;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+}
+
+.job-card h3 {
+  color: var(--dark-blue);
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.job-card p {
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+  color: var(--text-color);
+}
+
+.job-card strong {
+  color: var(--primary-blue);
+}
+
+.job-card .posted-date {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 15px;
+  text-align: right;
+}
+
+.job-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.job-actions button {
+  padding: 8px 15px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.job-actions .view-applicants-btn {
+  background-color: #28a745; /* Green */
+  color: white;
+  border: none;
+}
+
+.job-actions .view-applicants-btn:hover {
+  background-color: #218838;
+}
+
+.job-actions .edit-job-btn {
+  background-color: #ffc107; /* Yellow */
+  color: var(--dark-blue);
+  border: none;
+}
+
+.job-actions .edit-job-btn:hover {
+  background-color: #e0a800;
+}
+
+.job-actions .delete-job-btn {
+  background-color: #dc3545; /* Red */
+  color: white;
+  border: none;
+}
+
+.job-actions .delete-job-btn:hover {
+  background-color: #c82333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .dashboard-container {
+    margin: 10px;
+    width: calc(100% - 20px);
+    height: calc(100vh - 20px);
+  }
+  .sidebar {
+    width: 220px;
+    padding: 20px 15px;
+  }
+  .sidebar .logo {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+  .main-content {
+    padding: 30px;
+  }
+  .main-content h1 {
+    font-size: 2rem;
+  }
+  .dashboard-section {
+    padding: 25px;
+  }
+  .form-container {
+    padding: 15px;
+  }
+  .job-card h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 15px 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar .logo {
+    display: none;
+  }
+
+  .sidebar-nav ul {
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .sidebar-nav li {
+    flex: 1;
+    text-align: center;
+  }
+
+  .sidebar-nav a {
+    font-size: 0.9rem;
+    padding: 10px 8px;
+    gap: 5px;
+    justify-content: center;
+  }
+
+  .main-content {
+    padding: 20px;
+    border-left: none;
+    border-top: 1px solid var(--medium-gray);
+    overflow-y: visible;
+  }
+  .main-content h1 {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+  }
+  .dashboard-section {
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .job-card {
+    padding: 15px;
+  }
+  .job-card h3 {
+    font-size: 1.2rem;
+  }
+  .job-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .job-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-nav a {
+    font-size: 0.8rem;
+    padding: 8px 5px;
+  }
+}

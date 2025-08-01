@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const Job = require("../models/job");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 
@@ -15,9 +16,15 @@ const getLoginPage = (req, res, next) => {
   );
 };
 
+const getRecruiterDashboard = (req, res, next) => {
+  res.sendFile(
+    path.join(__dirname, "../", "public", "views", "recruiterDashboard.html")
+  );
+};
+
 const signUp = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body; // Remove role from destructuring, set explicitly below
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Please fill in all fields" });
@@ -33,7 +40,7 @@ const signUp = async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
-      role: "employer",
+      role: "employer", // Explicitly set role for recruiter sign-up
     });
     await user.save();
 
@@ -46,10 +53,14 @@ const signUp = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user || (role && user.role !== role)) {
-      return res.status(401).json({ message: "Invalid credentials" });
+
+    // Check if user exists and if their role is 'employer'
+    if (!user || user.role !== "employer") {
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials or not an employer account" });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
@@ -58,7 +69,7 @@ const login = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, role: user.role }, // Include role in token payload
       process.env.TOKEN_SECRET,
       {
         expiresIn: "2h",
@@ -72,6 +83,7 @@ const login = async (req, res, next) => {
         role: user.role,
         email: user.email,
       },
+      redirect: "/recruiter/dashboard",
     });
   } catch (err) {
     console.log(err);
@@ -79,4 +91,78 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = { getSignUpPage, getLoginPage, signUp, login };
+const postJob = async (req, res, next) => {
+  try {
+    const {
+      title,
+      company,
+      location,
+      description,
+      requirements,
+      salary,
+      type,
+    } = req.body;
+
+    // The user ID is available from the authenticated token
+    const postedBy = req.user.userId;
+
+    // Basic validation
+    if (
+      !title ||
+      !company ||
+      !location ||
+      !description ||
+      !requirements ||
+      !postedBy
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Please fill in all required fields." });
+    }
+
+    const newJob = new Job({
+      title,
+      company,
+      location,
+      description,
+      requirements,
+      salary,
+      type,
+      postedBy,
+    });
+
+    await newJob.save();
+    res.status(201).json({ message: "Job posted successfully!", job: newJob });
+  } catch (err) {
+    console.error("Error posting job:", err);
+    res.status(500).json({ message: "Server error while posting job." });
+  }
+};
+
+const getMyPostedJobs = async (req, res, next) => {
+  try {
+    const recruiterId = req.user.userId; // Get recruiter ID from authenticated token
+    const jobs = await Job.find({ postedBy: recruiterId }).sort({
+      postedAt: -1,
+    });
+
+    if (!jobs || jobs.length === 0) {
+      return res.status(200).json({ message: "No jobs posted yet.", jobs: [] });
+    }
+
+    res.status(200).json({ jobs });
+  } catch (err) {
+    console.error("Error fetching posted jobs:", err);
+    res.status(500).json({ message: "Server error while fetching your jobs." });
+  }
+};
+
+module.exports = {
+  getSignUpPage,
+  getLoginPage,
+  getRecruiterDashboard,
+  signUp,
+  login,
+  postJob,
+  getMyPostedJobs,
+};
