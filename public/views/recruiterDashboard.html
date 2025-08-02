@@ -2,69 +2,80 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recruiter Dashboard - CareerTrack</title>
+    <title>Recruiter Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap"
+      rel="stylesheet" />
     <link rel="stylesheet" href="../css/recruiterDashboard.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
-      rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
-      rel="stylesheet" />
   </head>
   <body>
     <div class="dashboard-container">
+      <!-- Sidebar -->
       <nav class="sidebar">
         <div class="logo">Hirely</div>
-        <ul class="sidebar-nav">
-          <li><a id="postJobBtn" class="active" href="#">📝 Post Job</a></li>
-          <li><a id="myPostedJobsBtn" href="#">📋 My Jobs</a></li>
-          <li><a id="recruiterProfileBtn" href="#">👤 Profile</a></li>
-          <li style="margin-top: auto">
-            <button id="recruiterLogoutBtn" class="logout-btn">⏻ Logout</button>
-          </li>
-        </ul>
+        <div class="sidebar-nav">
+          <ul>
+            <li><a id="postJobBtn" class="active" href="#">📝 Post Job</a></li>
+            <li><a id="myPostedJobsBtn" href="#">📋 My Jobs</a></li>
+            <li><a id="recruiterProfileBtn" href="#">👤 Profile</a></li>
+          </ul>
+          <button id="recruiterLogoutBtn" class="logout-btn">⏻ Logout</button>
+        </div>
       </nav>
+      <!-- Main -->
       <main class="main-content">
         <h1 id="sectionTitle">Post New Job</h1>
 
         <!-- Post Job Section -->
-        <section class="dashboard-section" id="postJobSection">
+        <section class="dashboard-section hidden" id="postJobSection">
+          <!-- Added hidden class -->
           <form id="postJobForm" class="form-container">
             <div class="input-group">
               <label for="jobTitle">Job Title</label>
               <input
                 type="text"
                 id="jobTitle"
-                placeholder="e.g. Senior Developer" />
+                placeholder="e.g. Senior Developer"
+                required />
+              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="companyName">Company Name</label>
               <input
                 type="text"
                 id="companyName"
-                placeholder="e.g. Acme Corp" />
+                placeholder="e.g. Acme Corp"
+                required />
+              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobLocation">Location</label>
               <input
                 type="text"
                 id="jobLocation"
-                placeholder="e.g. Remote, New York" />
+                placeholder="e.g. Remote, New York"
+                required />
+              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobDescription">Job Description</label>
               <textarea
                 id="jobDescription"
                 rows="3"
-                placeholder="Brief job description..."></textarea>
+                placeholder="Short job description"
+                required></textarea>
+              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobRequirements">Requirements</label>
               <textarea
                 id="jobRequirements"
                 rows="2"
-                placeholder="Key skills and experience..."></textarea>
+                placeholder="Key skills, experience..."
+                required></textarea>
+              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobSalary">Salary (optional)</label>
@@ -90,8 +101,10 @@
         <!-- My Posted Jobs Section -->
         <section class="dashboard-section hidden" id="myPostedJobsSection">
           <button id="backToJobsBtn" class="back-button hidden">← Back</button>
-          <div id="jobListingsContainer"></div>
-          <div id="applicantsListContainer" class="hidden"></div>
+          <div id="jobListingsContainer" class="jobs-grid"></div>
+          <div
+            id="applicantsListContainer"
+            class="applicants-grid hidden"></div>
         </section>
 
         <!-- Profile Section -->
@@ -102,7 +115,6 @@
         </section>
       </main>
     </div>
-
     <script src="../js/recruiterDashboard.js"></script>
   </body>
 </html>

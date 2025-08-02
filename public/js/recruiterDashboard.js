@@ -25,6 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const backButton = document.getElementById("backToJobsBtn");
 
+  // Store the current job ID and title when viewing applicants
+  // This helps when updating status and needing to reload the specific applicant list
+  let currentViewedJobId = null;
+  let currentViewedJobTitle = null;
+
   // --- Helper Functions ---
 
   /**
@@ -88,6 +93,22 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("postJobForm")
     .addEventListener("submit", handlePostJob);
 
+  // Attach event listener for the back button (only once, as it's a persistent element)
+  // Ensure backButton exists before attaching listener
+  if (backButton) {
+    if (!backButton.dataset.listenerAttached) {
+      backButton.addEventListener("click", () => {
+        console.log("Back button clicked. Returning to My Posted Jobs.");
+        jobListingsContainer.style.display = "block"; // Show job listings
+        applicantsListContainer.style.display = "none"; // Hide applicants container
+        backButton.style.display = "none"; // Hide back button
+        sectionTitle.innerText = "My Posted Jobs"; // Reset title on back
+        loadMyPostedJobs(); // Reload the job list to ensure counts are updated if needed
+      });
+      backButton.dataset.listenerAttached = "true"; // Mark listener as attached
+    }
+  }
+
   // --- Initial Load ---
   // Default to showing the "Post New Job" form on page load
   document.getElementById("postJobBtn").click();
@@ -101,19 +122,19 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handlePostJob(event) {
     event.preventDefault();
 
-    const title = document.getElementById("jobTitle").value;
-    const company = (document = document.getElementById("companyName").value); // Corrected: document.getElementById
-    const location = document.getElementById("jobLocation").value;
-    const description = document.getElementById("jobDescription").value;
-    const requirements = document.getElementById("jobRequirements").value;
-    const salary = document.getElementById("jobSalary").value;
+    const title = document.getElementById("jobTitle").value.trim();
+    const company = document.getElementById("companyName").value.trim(); // Corrected typo and added trim
+    const location = document.getElementById("jobLocation").value.trim();
+    const description = document.getElementById("jobDescription").value.trim();
+    const requirements = document
+      .getElementById("jobRequirements")
+      .value.trim();
+    const salary = document.getElementById("jobSalary").value.trim();
     const type = document.getElementById("jobType").value;
 
-    // Basic validation
+    // Basic validation (now redundant with HTML 'required' but good fallback)
     if (!title || !company || !location || !description || !requirements) {
-      alert(
-        "Please fill in all required fields (Title, Company, Location, Description, Requirements)."
-      );
+      alert("Please fill in all required fields.");
       return;
     }
 
@@ -145,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.message || "Failed to post job."));
       }
     } catch (error) {
-      console.error("Error posting job:", error);
+      console.error("An error occurred while posting the job:", error); // More specific console log
       alert("An error occurred while posting the job.");
     }
   }
@@ -158,6 +179,11 @@ document.addEventListener("DOMContentLoaded", () => {
     jobListingsContainer.style.display = "block";
     applicantsListContainer.style.display = "none";
     backButton.style.display = "none"; // Ensure back button is hidden here
+
+    // Add the jobs-grid class to the container
+    jobListingsContainer.classList.add("jobs-grid");
+    // Remove applicants-grid class if it was previously added
+    applicantsListContainer.classList.remove("applicants-grid");
 
     jobListingsContainer.innerHTML = `<p>Fetching your posted jobs...</p>`; // Show loading message
 
@@ -179,45 +205,46 @@ document.addEventListener("DOMContentLoaded", () => {
             jobCard.classList.add("job-card");
             jobCard.innerHTML = `
               <h3>${job.title}</h3>
-              <p><strong>Company:</strong> ${job.company}</p>
-              <p><strong>Location:</strong> ${job.location}</p>
-              <p><strong>Type:</strong> ${job.type}</p>
-              <p><strong>Salary:</strong> ${job.salary || "N/A"}</p>
+              <div class="job-meta">
+                <span>🏢 ${job.company}</span>
+                <span>📍 ${job.location}</span>
+                <span>💼 ${job.type}</span>
+                <span>💲${job.salary || "N/A"}</span>
+              </div>
               <p><strong>Description:</strong> ${job.description}</p>
               <p><strong>Requirements:</strong> ${job.requirements}</p>
-              <p class="posted-date">Posted on: ${new Date(
+              <div class="posted-date">Posted on: ${new Date(
                 job.postedAt
-              ).toLocaleDateString()}</p>
+              ).toLocaleDateString()}</div>
               <div class="job-actions">
                 <button class="view-applicants-btn" data-job-id="${
                   job._id
-                }" data-job-title="${job.title}">View Applicants (${
+                }" data-job-title="${job.title}">👥 Applicants (${
               job.applicants.length
             })</button>
                 <button class="edit-job-btn" data-job-id="${
                   job._id
-                }">Edit</button>
+                }">✏️ Edit</button>
                 <button class="delete-job-btn" data-job-id="${
                   job._id
-                }">Delete</button>
+                }">🗑️ Delete</button>
               </div>
             `;
             jobListingsContainer.appendChild(jobCard);
           });
           addJobActionListeners(); // Attach listeners to new job cards
         } else {
-          jobListingsContainer.innerHTML =
-            "<p>You haven't posted any jobs yet.</p>";
+          jobListingsContainer.innerHTML = `<div>You haven't posted any jobs yet.</div>`;
         }
       } else {
-        jobListingsContainer.innerHTML = `<p>Error: ${
+        jobListingsContainer.innerHTML = `<div>Error: ${
           data.message || "Failed to load jobs."
-        }</p>`;
+        }</div>`;
         alert("Error: " + (data.message || "Failed to load your posted jobs."));
       }
     } catch (error) {
-      console.error("Error fetching posted jobs:", error);
-      jobListingsContainer.innerHTML = `<p>An error occurred while fetching your jobs.</p>`;
+      console.error("An error occurred while fetching your jobs:", error); // More specific console log
+      jobListingsContainer.innerHTML = `<div>An error occurred while fetching your jobs.</div>`;
       alert("An error occurred while fetching your jobs.");
     }
   }
@@ -230,6 +257,9 @@ document.addEventListener("DOMContentLoaded", () => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
         const jobTitle = e.target.dataset.jobTitle;
+        // Store current job details for potential re-load after status update
+        currentViewedJobId = jobId;
+        currentViewedJobTitle = jobTitle;
         loadApplicantsForJob(jobId, jobTitle);
       });
     });
@@ -237,17 +267,19 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".edit-job-btn").forEach((button) => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
-        alert(`Edit Job ID: ${jobId} (Feature to be implemented)`);
+        alert(
+          `Edit Job ID: ${button.dataset.jobId} (Feature to be implemented)`
+        );
       });
     });
 
     document.querySelectorAll(".delete-job-btn").forEach((button) => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
-        if (
-          confirm(`Are you sure you want to delete this job (ID: ${jobId})?`)
-        ) {
-          alert(`Deleting Job ID: ${jobId} (Feature to be implemented)`);
+        if (confirm(`Are you sure you want to delete this job?`)) {
+          alert(
+            `Deleting Job ID: ${button.dataset.jobId} (Feature to be implemented)`
+          );
         }
       });
     });
@@ -263,6 +295,11 @@ document.addEventListener("DOMContentLoaded", () => {
     jobListingsContainer.style.display = "none";
     applicantsListContainer.style.display = "block";
     backButton.style.display = "block"; // Ensure back button is shown
+
+    // Remove jobs-grid class from jobListingsContainer when hiding it
+    jobListingsContainer.classList.remove("jobs-grid");
+    // Add applicants-grid class to the applicants container
+    applicantsListContainer.classList.add("applicants-grid");
 
     sectionTitle.innerText = `Applicants for "${jobTitle}"`; // Update main title
 
@@ -284,6 +321,8 @@ document.addEventListener("DOMContentLoaded", () => {
           data.applicants.forEach((app) => {
             const applicantCard = document.createElement("div");
             applicantCard.classList.add("applicant-card");
+            // Add data-job-id to applicant card for easier reference during status update
+            applicantCard.dataset.jobId = jobId; // Set job ID on the applicant card
             applicantCard.innerHTML = `
               <h3>${app.jobSeeker.name}</h3>
               <p><strong>Email:</strong> ${app.jobSeeker.email}</p>
@@ -315,21 +354,9 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.message || "Failed to load applicants."));
       }
     } catch (error) {
-      console.error("Error fetching applicants:", error);
+      console.error("An error occurred while fetching applicants:", error); // More specific console log
       applicantsListContainer.innerHTML = `<p>An error occurred while fetching applicants.</p>`;
       alert("An error occurred while fetching applicants.");
-    }
-
-    // Attach event listener for the back button (only once)
-    if (!backButton.dataset.listenerAttached) {
-      backButton.addEventListener("click", () => {
-        jobListingsContainer.style.display = "block"; // Show job listings
-        applicantsListContainer.style.display = "none"; // Hide applicants container
-        backButton.style.display = "none"; // Hide back button
-        sectionTitle.innerText = "My Posted Jobs"; // Reset title on back
-        loadMyPostedJobs(); // Reload the job list
-      });
-      backButton.dataset.listenerAttached = "true"; // Mark listener as attached
     }
   }
 
@@ -339,9 +366,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function addApplicantActionListeners() {
     document.querySelectorAll(".update-status-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
-        // Made async
         const applicationId = e.target.dataset.applicationId;
-        const currentStatus = e.target.dataset.currentStatus;
+        const currentStatus = e.target.dataset.currentStatus; // Corrected: Use dataset.currentStatus
+        const parentJobId = e.target.closest(".applicant-card").dataset.jobId; // Get job ID from parent card
 
         // Prompt for new status
         const newStatus = prompt(
@@ -384,24 +411,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (response.ok) {
             alert(data.message);
-            // Refresh the applicants list to show the updated status
-            // We need the jobId and jobTitle to reload the current view
-            // This requires passing them or storing them globally/in parent element data
-            // For simplicity, let's just reload the entire "My Posted Jobs" section for now
-            // A better UX would be to just reload the current applicant list
-            document.getElementById("myPostedJobsBtn").click(); // Go back to jobs list and then click view applicants again
-            // Or, ideally, re-call loadApplicantsForJob with the current jobId and jobTitle
-            // To do this, we need to store jobId and jobTitle when loadApplicantsForJob is called
-            // For now, let's just reload my posted jobs which will then allow re-clicking
-            // Or, even better, pass the current job ID and title to this function if possible
-            const currentJobId =
-              e.target.closest(".applicant-card").dataset.jobId; // This would require adding data-job-id to applicant-card
-            const currentJobTitle = sectionTitle.innerText
-              .replace('Applicants for "', "")
-              .replace('"', ""); // Extract from title
-
             // Re-load the specific applicants list to reflect the change
-            loadApplicantsForJob(currentJobId, currentJobTitle);
+            // Use the globally stored currentViewedJobId and currentViewedJobTitle
+            // Or, even better, use parentJobId and currentViewedJobTitle
+            loadApplicantsForJob(parentJobId, currentViewedJobTitle); // Use parentJobId for robustness
           } else {
             alert(
               "Error updating status: " +
@@ -409,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
           }
         } catch (error) {
-          console.error("Error updating status:", error);
+          console.error("An error occurred while updating the status:", error); // More specific console log
           alert("An error occurred while updating the status.");
         }
       });
