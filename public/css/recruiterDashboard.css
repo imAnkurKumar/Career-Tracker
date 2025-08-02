@@ -1,281 +1,347 @@
+/* Base styles - now aligned with dashboard.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
-  --primary: #4f8cff;
-  --accent: #a259ff;
-  --success: #27ae60;
-  --danger: #ff5858;
-  --bg: #f5f8fa;
-  --card-bg: #fff;
-  --nav-bg: #232940;
-  --nav-active: #36415a;
-  --text: #23272f;
-  --muted: #6c737b;
-  --radius: 18px;
-  --shadow: 0 2px 18px rgba(79, 140, 255, 0.08);
-  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Aligned with job seeker dashboard colors */
+  --primary-blue: #4a90e2;
+  --dark-blue: #2c3e50;
+  --light-gray: #ecf0f1;
+  --medium-gray: #bdc3c7;
+  --text-color: #34495e;
+  --white: #ffffff;
+  --hover-light: #6faee6; /* Adjusted for primary-blue */
+
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+
+  /* Specific colors for recruiter actions, adapted to new palette */
+  --success: #28a745; /* Green for View Applicants */
+  --accent: #ffc107; /* Yellow for Edit */
+  --danger: #dc3545; /* Red for Delete */
+  --info: #17a2b8; /* Teal for Reviewed status */
+  --primary-button: var(--primary-blue); /* Default button color */
+  --secondary-button: #6c757d; /* Grey for Update Status */
 }
 
 body {
-  font-family: "Poppins", Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  margin: 0;
-  min-height: 100vh;
+  font-family: "Inter", sans-serif; /* Keep Inter for consistency with job seeker dashboard */
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  line-height: 1.6;
+  height: 100vh; /* Ensure body takes full viewport height */
+  overflow: hidden; /* Prevent body from scrolling */
+  display: flex; /* Use flexbox for body to center content vertically */
+  justify-content: center;
+  align-items: center;
 }
 
 .dashboard-container {
   display: flex;
-  min-height: 100vh;
-  max-width: 1400px;
-  margin: 0 auto;
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  width: calc(100% - 40px); /* Account for 20px margin on each side */
+  height: calc(100vh - 40px); /* Account for 20px margin on top/bottom */
+  max-width: 1400px; /* Optional: limit overall width */
+  background-color: var(--white); /* Background for the whole container */
+  box-shadow: var(--shadow-medium);
+  border-radius: var(--border-radius-md);
+  /* Removed overflow: hidden from here, main-content will handle it */
 }
 
 .sidebar {
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  background: var(--nav-bg);
-  color: #fff;
-  min-width: 250px;
-  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
-  border-radius: var(--radius) 0 0 var(--radius);
-  box-shadow: var(--shadow);
+  width: 280px;
+  background-color: var(--dark-blue);
+  color: var(--white);
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  height: 100vh;
-  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
+  height: 100%; /* Take full height of parent .dashboard-container */
+  overflow-y: auto; /* Allow sidebar content to scroll if it overflows */
   z-index: 10;
 }
-.logo {
-  font-size: 2.25rem;
-  font-weight: 900;
-  margin-bottom: 3rem;
-  color: var(--primary);
-  letter-spacing: -1px;
+
+.sidebar .logo {
+  font-size: 2rem; /* Adjusted from 2.25rem to match job seeker */
+  font-weight: 800; /* Adjusted from 900 */
+  margin-bottom: 50px; /* Adjusted from 3rem */
+  text-align: center;
+  color: var(--primary-blue);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: normal; /* Removed negative letter-spacing */
 }
+
 .sidebar-nav {
   flex: 1 1 auto;
+  padding: 0;
+  margin: 0;
 }
 .sidebar-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex; /* Added flex for vertical alignment */
+  flex-direction: column; /* Added flex for vertical alignment */
+  gap: 15px; /* Consistent gap */
 }
 .sidebar-nav li {
-  margin-bottom: 1.5rem;
+  margin-bottom: 5px; /* Adjusted from 1.5rem */
 }
 .sidebar-nav a {
-  display: block;
-  padding: 0.85rem 1.15rem;
-  font-size: 1.08rem;
-  border-radius: 9px;
-  color: #fff;
+  display: flex; /* Use flex for icon + text alignment */
+  align-items: center;
+  gap: 10px; /* Space between icon and text */
+  padding: 12px 15px; /* Adjusted from 0.85rem 1.15rem */
+  font-size: 1.05rem; /* Adjusted from 1.08rem */
+  border-radius: var(--border-radius-sm); /* Consistent border-radius */
+  color: var(--white);
   text-decoration: none;
   font-weight: 600;
-  transition: background var(--transition), color var(--transition),
-    box-shadow var(--transition);
+  transition: background-color 0.3s ease, color 0.3s ease; /* Consistent transition */
   position: relative;
 }
 .sidebar-nav a.active,
 .sidebar-nav a:hover {
-  background: var(--nav-active);
-  color: var(--primary);
+  background-color: var(--primary-blue); /* Adjusted from var(--nav-active) */
+  color: var(--white); /* Keep white text on active/hover */
+  box-shadow: var(--shadow-light); /* Consistent shadow */
 }
 .logout-btn {
-  background: linear-gradient(90deg, var(--danger), var(--primary));
+  background-color: var(
+    --danger
+  ); /* Simpler background, consistent with danger color */
   color: #fff;
   border: none;
-  border-radius: 9px;
+  border-radius: var(--border-radius-sm); /* Consistent border-radius */
   font-size: 1.05rem;
-  font-weight: 700;
-  padding: 0.75rem;
+  font-weight: 600; /* Adjusted from 700 */
+  padding: 10px 15px; /* Adjusted padding */
   cursor: pointer;
-  margin-top: 1.5rem;
+  margin-top: auto; /* Push to bottom of sidebar */
   width: 100%;
-  transition: background var(--transition), transform var(--transition);
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Consistent transition */
 }
 .logout-btn:hover {
-  transform: scale(1.03);
-  filter: brightness(1.1);
+  background-color: #c82333; /* Darker red on hover */
+  transform: translateY(-2px); /* Consistent transform */
+  filter: none; /* Remove filter if using direct background-color change */
 }
 
 .main-content {
   flex: 1 1 auto;
-  padding: 2.4rem 6vw;
+  padding: 40px; /* Adjusted from 2.4rem 6vw */
+  background-color: var(--white); /* Consistent background */
+  border-left: 1px solid var(--medium-gray); /* Consistent border */
+  height: 100%;
   overflow-y: auto;
 }
 .main-content h1 {
-  font-size: 2.45rem;
-  color: var(--primary);
-  margin-bottom: 2rem;
-  font-weight: 900;
-  letter-spacing: -2.5px;
+  font-size: 2.2rem; /* Adjusted from 2.45rem */
+  color: var(--dark-blue); /* Adjusted from var(--primary) */
+  margin-bottom: 25px; /* Adjusted from 2rem */
+  font-weight: 800; /* Adjusted from 900 */
+  border-bottom: 2px solid var(--primary-blue); /* Consistent border */
+  padding-bottom: 10px; /* Consistent padding */
+  display: inline-block; /* To make border-bottom only as wide as text */
+  letter-spacing: normal; /* Removed negative letter-spacing */
 }
 
 .dashboard-section {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 2.3rem 2.5rem;
-  margin-bottom: 2.2rem;
-  border: none;
-  transition: box-shadow var(--transition), transform var(--transition);
+  background-color: var(--light-gray); /* Consistent background */
+  border-radius: var(--border-radius-md); /* Consistent border-radius */
+  box-shadow: var(--shadow-light); /* Consistent shadow */
+  padding: 30px; /* Adjusted from 2.3rem 2.5rem */
+  margin-bottom: 20px; /* Adjusted from 2.2rem */
+  border: 1px solid var(--medium-gray); /* Consistent border */
+  transition: box-shadow 0.3s ease, transform 0.2s ease; /* Consistent transition */
 }
 .dashboard-section:not(.hidden):hover {
-  box-shadow: 0 8px 32px rgba(79, 140, 255, 0.1);
-  transform: translateY(-2px) scale(1.009);
+  box-shadow: var(--shadow-medium); /* Consistent hover shadow */
+  transform: translateY(-2px); /* Consistent transform */
 }
 .dashboard-section.hidden {
   display: none !important;
 }
 
+.form-container {
+  max-width: 600px; /* Keep max-width */
+  margin: 0 auto; /* Center form */
+  padding: 20px; /* Adjusted from 2.3rem 2.5rem */
+  background-color: var(--white); /* Consistent background */
+  border-radius: var(--border-radius-md); /* Consistent border-radius */
+  box-shadow: var(--shadow-medium); /* Consistent shadow */
+}
 .form-container input,
 .form-container textarea,
 .form-container select {
   width: 100%;
-  padding: 1rem;
-  border: 1px solid #e7ebf0;
-  border-radius: 10px;
-  font-size: 1.05rem;
-  background: #f9fbfd;
-  margin-bottom: 1.45rem;
-  transition: border-color var(--transition);
+  padding: 12px; /* Adjusted from 1rem */
+  border: 1px solid var(--medium-gray); /* Consistent border */
+  border-radius: var(--border-radius-sm); /* Consistent border-radius */
+  font-size: 1rem; /* Adjusted from 1.05rem */
+  background-color: var(--white); /* Consistent background */
+  margin-bottom: 20px; /* Adjusted from 1.45rem */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Consistent transition */
 }
 .form-container input:focus,
 .form-container textarea:focus,
 .form-container select:focus {
-  border-color: var(--primary);
+  border-color: var(--primary-blue); /* Consistent border color */
+  box-shadow: 0 0 0 3px rgba(46, 134, 222, 0.2); /* Consistent shadow */
   outline: none;
 }
 .form-container label {
   font-weight: 600;
-  margin-bottom: 0.3rem;
-  color: var(--text);
+  margin-bottom: 8px; /* Adjusted from 0.3rem */
+  color: var(--text-color); /* Consistent text color */
   display: block;
 }
 .form-container button[type="submit"] {
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+  background-color: var(--primary-blue); /* Consistent background */
   color: white;
   border: none;
-  border-radius: 9px;
+  border-radius: var(--border-radius-sm); /* Consistent border-radius */
   font-size: 1.1rem;
-  font-weight: 700;
-  padding: 0.85rem 0;
+  font-weight: 600; /* Adjusted from 700 */
+  padding: 12px 20px; /* Adjusted padding */
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 10px; /* Adjusted from 1rem */
   width: 100%;
-  transition: background var(--transition), transform var(--transition);
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Consistent transition */
 }
 .form-container button[type="submit"]:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px) scale(1.03);
+  background-color: var(--hover-light); /* Consistent hover background */
+  transform: translateY(-2px); /* Consistent transform */
+  filter: none; /* Removed filter */
 }
 .input-group {
-  margin-bottom: 1.08rem;
+  margin-bottom: 20px; /* Adjusted from 1.08rem */
 }
 
-.jobs-grid {
+/* New: Grid for Job Listings and Applicants */
+.jobs-grid,
+.applicants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* Two columns, responsive */
+  gap: 1.5rem; /* Space between cards */
+  margin-top: 1.5rem; /* Space from section title */
 }
-.job-card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  border-left: 6px solid var(--primary);
+
+.job-card,
+.applicant-card {
+  background-color: var(--white); /* Consistent background */
+  border: 1px solid var(--medium-gray); /* Consistent border */
+  border-radius: var(--border-radius-md); /* Consistent border-radius */
+  padding: 20px; /* Adjusted from 1.5rem 2rem */
+  margin-bottom: 20px; /* Adjusted from 1.12rem */
+  box-shadow: var(--shadow-light); /* Consistent shadow */
+  transition: transform 0.2s ease-in-out; /* Consistent transition */
+  border-left: 5px solid var(--primary-blue); /* Consistent accent border */
   display: flex;
   flex-direction: column;
-  padding: 2rem 1.5rem 1.2rem 1.5rem;
-  position: relative;
-  transition: box-shadow var(--transition), transform var(--transition);
+  justify-content: space-between;
 }
-.job-card:hover {
-  box-shadow: 0 12px 36px rgba(79, 140, 255, 0.16);
-  transform: translateY(-3px) scale(1.018);
+.job-card:hover,
+.applicant-card:hover {
+  transform: translateY(-5px); /* Consistent hover effect */
+  box-shadow: var(--shadow-medium); /* Consistent hover shadow */
 }
-.job-card h3 {
-  color: var(--primary);
-  font-size: 1.4rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  margin-top: 0;
+.job-card h3,
+.applicant-card h3 {
+  margin: 0 0 10px 0; /* Adjusted from 0.45rem */
+  color: var(--dark-blue); /* Consistent color */
+  font-size: 1.5rem; /* Adjusted from 1.25rem */
+  font-weight: 800; /* Adjusted from 700 */
 }
-.job-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.15rem;
-  font-size: 1rem;
-  margin-bottom: 0.45rem;
+.job-card p,
+.applicant-card p {
+  margin-bottom: 5px; /* Adjusted from 0.32rem */
+  color: var(--text-color); /* Consistent color */
+  font-size: 0.95rem; /* Adjusted from 1em */
 }
-.job-meta span {
-  color: var(--muted);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.32rem;
+.job-card strong,
+.applicant-card strong {
+  color: var(--primary-blue); /* Consistent color */
 }
-.job-card p {
-  margin-bottom: 0.4rem;
-  color: var(--text);
-  font-size: 1.04rem;
-}
-.job-card .posted-date {
-  color: #97a0b4;
-  font-size: 0.91rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+.job-card .posted-date,
+.applicant-card .applied-date {
+  font-size: 0.85rem;
+  color: #777; /* Consistent color */
+  margin-top: 15px; /* Adjusted from 1rem */
   text-align: right;
 }
-.job-actions {
+.job-actions,
+.applicant-actions {
+  margin-top: 15px; /* Adjusted from 1.08rem */
   display: flex;
-  gap: 0.7rem;
-  margin-top: 1.2rem;
+  flex-wrap: wrap;
+  gap: 10px; /* Adjusted from 0.72rem */
   justify-content: flex-end;
 }
-.job-actions button {
-  border: none;
-  border-radius: 7px;
-  color: #fff;
-  padding: 0.42rem 1rem;
-  min-width: 90px;
-  font-size: 0.97rem;
-  font-weight: 600;
-  transition: background var(--transition), transform var(--transition);
+.job-actions button,
+.applicant-actions button,
+.applicant-actions .view-resume-btn {
+  padding: 8px 15px; /* Adjusted from 0.52rem 1.12rem */
+  border-radius: var(--border-radius-sm); /* Consistent border-radius */
+  font-size: 0.9rem; /* Adjusted from 0.96rem */
   cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Consistent transition */
+  border: none; /* Ensure no default border */
+  color: white; /* Default text color for buttons */
 }
 .job-actions .view-applicants-btn {
-  background: var(--success);
+  background-color: var(--success);
 }
 .job-actions .edit-job-btn {
-  background: var(--accent);
+  background-color: var(--accent);
+  color: var(--dark-blue); /* Make text dark for yellow background */
 }
 .job-actions .delete-job-btn {
-  background: var(--danger);
+  background-color: var(--danger);
 }
 .job-actions button:hover {
-  filter: brightness(1.13);
-  transform: scale(1.043);
+  filter: brightness(1.12); /* Adjusted from 1.13 */
+  transform: translateY(-2px); /* Consistent transform */
 }
 
+.applicant-actions .view-resume-btn {
+  background-color: var(--primary-blue); /* Consistent with primary-blue */
+}
+.applicant-actions .update-status-btn {
+  background-color: var(
+    --secondary-button
+  ); /* Consistent with secondary button color */
+}
+.applicant-actions .no-resume {
+  color: var(--danger);
+  font-style: italic;
+  font-size: 0.91rem;
+}
 .back-button {
-  background: var(--nav-active);
+  background-color: var(--primary-blue); /* Consistent with primary-blue */
   color: #fff;
   border: none;
-  padding: 0.7rem 1.42rem;
-  border-radius: 7px;
+  padding: 10px 20px; /* Adjusted padding */
+  border-radius: var(--border-radius-sm); /* Consistent border-radius */
   font-size: 1rem;
   cursor: pointer;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px; /* Adjusted margin */
   display: block;
-  transition: background var(--transition), filter var(--transition);
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Consistent transition */
 }
 .back-button:hover {
-  background: var(--primary);
+  background-color: var(--hover-light); /* Consistent hover */
+  transform: translateY(-2px);
 }
 .back-button.hidden {
   display: none !important;
@@ -298,7 +364,9 @@ body {
   color: #28a745;
 } /* Green */
 
-@media (max-width: 960px) {
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  /* Adjusted from 960px to 992px for consistency with job seeker dashboard */
   .dashboard-container {
     flex-direction: column;
     width: 100%;
@@ -308,8 +376,8 @@ body {
   .sidebar {
     position: static;
     height: auto;
-    border-radius: 0 0 var(--radius) var(--radius);
-    padding: 1.5rem 1rem;
+    border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); /* Consistent border-radius */
+    padding: 15px 10px; /* Adjusted padding */
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
@@ -324,41 +392,52 @@ body {
   }
   .sidebar-nav ul {
     flex-direction: row;
-    gap: 1rem;
+    gap: 8px; /* Adjusted gap */
   }
   .sidebar-nav li {
     margin-bottom: 0;
   }
   .sidebar-nav a {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.95rem;
+    padding: 10px 8px; /* Adjusted padding */
+    font-size: 0.9rem; /* Adjusted font size */
   }
   .logout-btn {
     margin-top: 0;
     font-size: 0.9rem;
-    padding: 0.6rem 0.8rem;
+    padding: 10px 8px; /* Adjusted padding */
   }
   .main-content {
-    padding: 1.5rem 3vw;
+    padding: 30px; /* Adjusted padding */
+    overflow-y: auto;
   }
   .main-content h1 {
     font-size: 2rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 20px; /* Adjusted margin */
+    padding-bottom: 8px; /* Consistent padding */
   }
   .dashboard-section {
-    padding: 1.5rem;
+    padding: 25px; /* Adjusted padding */
   }
-  .jobs-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .jobs-grid,
+  .applicants-grid {
+    /* Added applicants-grid here */
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    ); /* Adjusted minmax */
     gap: 1.2rem;
   }
-  .job-card h3 {
-    font-size: 1.18rem;
+  .job-card h3,
+  .applicant-card h3 {
+    /* Added applicant-card here */
+    font-size: 1.3rem; /* Adjusted font size */
   }
 }
-@media (max-width: 600px) {
+
+@media (max-width: 768px) {
+  /* Adjusted from 600px to 768px for consistency */
   .sidebar {
-    padding: 1rem 0.5rem;
+    padding: 15px 10px; /* Adjusted padding */
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -368,28 +447,54 @@ body {
     margin-bottom: 0.5rem;
   }
   .sidebar-nav ul {
-    gap: 0.5rem;
+    gap: 8px; /* Adjusted gap */
   }
   .sidebar-nav a {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem; /* Adjusted font size */
+    padding: 10px 8px; /* Adjusted padding */
   }
   .logout-btn {
     width: auto;
-    padding: 0.5rem 0.7rem;
+    padding: 10px 8px; /* Adjusted padding */
   }
   .main-content {
-    padding: 1rem 2vw;
+    padding: 20px; /* Adjusted padding */
   }
   .dashboard-section {
-    padding: 1rem;
+    padding: 20px; /* Adjusted padding */
   }
-  .jobs-grid {
-    grid-template-columns: 1fr;
+  .jobs-grid,
+  .applicants-grid {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
     gap: 1rem;
   }
-  .job-card {
-    padding: 1.1rem 0.7rem;
+  .job-card,
+  .applicant-card {
+    padding: 15px; /* Adjusted padding */
+  }
+  .job-card h3,
+  .applicant-card h3 {
+    font-size: 1.2rem; /* Adjusted font size */
+  }
+  .job-actions,
+  .applicant-actions {
+    flex-direction: column;
+    gap: 8px; /* Adjusted gap */
+  }
+  .job-actions button,
+  .applicant-actions button,
+  .applicant-actions .view-resume-btn {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 8px 15px; /* Adjusted padding */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Added new breakpoint for very small screens */
+  .sidebar-nav a {
+    font-size: 0.8rem;
+    padding: 8px 5px;
   }
 }
 
@@ -400,6 +505,6 @@ body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
+  background: var(--primary-blue); /* Consistent with primary-blue */
   border-radius: 4px;
 }

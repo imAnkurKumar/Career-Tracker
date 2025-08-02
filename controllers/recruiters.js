@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Job = require("../models/job");
-const Application = require("../models/application"); // Import the Application model
+const Application = require("../models/application");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 
@@ -154,6 +154,32 @@ const getMyPostedJobs = async (req, res, next) => {
   }
 };
 
+const getJobById = async (req, res, next) => {
+  try {
+    const { jobId } = req.params;
+    const recruiterId = req.user.userId;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    // Authorization check: Ensure the recruiter owns this job
+    if (job.postedBy.toString() !== recruiterId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to view this job." });
+    }
+
+    res.status(200).json({ job });
+  } catch (err) {
+    console.error("Error fetching job by ID:", err);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching job details." });
+  }
+};
+
 const getApplicantsForJob = async (req, res, next) => {
   try {
     const jobId = req.params.jobId;
@@ -192,11 +218,10 @@ const getApplicantsForJob = async (req, res, next) => {
 
 const updateApplicationStatus = async (req, res, next) => {
   try {
-    const { applicationId } = req.params; // Get application ID from URL parameters
-    const { status } = req.body; // Get new status from request body
-    const recruiterId = req.user.userId; // Get recruiter ID from authenticated token
+    const { applicationId } = req.params;
+    const { status } = req.body;
+    const recruiterId = req.user.userId;
 
-    // Validate the new status against the enum in the Application model
     const validStatuses = [
       "Pending",
       "Reviewed",
@@ -210,7 +235,6 @@ const updateApplicationStatus = async (req, res, next) => {
         .json({ message: "Invalid application status provided." });
     }
 
-    // Find the application and populate the job to check ownership
     const application = await Application.findById(applicationId).populate(
       "job"
     );
@@ -219,7 +243,6 @@ const updateApplicationStatus = async (req, res, next) => {
       return res.status(404).json({ message: "Application not found." });
     }
 
-    // Ensure the recruiter owns the job associated with this application
     if (application.job.postedBy.toString() !== recruiterId) {
       return res
         .status(403)
@@ -228,7 +251,6 @@ const updateApplicationStatus = async (req, res, next) => {
         });
     }
 
-    // Update the application status
     application.status = status;
     await application.save();
 
@@ -246,6 +268,79 @@ const updateApplicationStatus = async (req, res, next) => {
   }
 };
 
+const editJob = async (req, res, next) => {
+  try {
+    const { jobId } = req.params;
+    const recruiterId = req.user.userId;
+    const {
+      title,
+      company,
+      location,
+      description,
+      requirements,
+      salary,
+      type,
+    } = req.body;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    // Authorization check: Ensure the recruiter owns this job
+    if (job.postedBy.toString() !== recruiterId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this job." });
+    }
+
+    // Update job fields
+    job.title = title || job.title;
+    job.company = company || job.company;
+    job.location = location || job.location;
+    job.description = description || job.description;
+    job.requirements = requirements || job.requirements;
+    job.salary = salary || job.salary;
+    job.type = type || job.type;
+
+    await job.save();
+    res.status(200).json({ message: "Job updated successfully!", job });
+  } catch (err) {
+    console.error("Error editing job:", err);
+    res.status(500).json({ message: "Server error while editing job." });
+  }
+};
+
+const deleteJob = async (req, res, next) => {
+  try {
+    const { jobId } = req.params;
+    const recruiterId = req.user.userId;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    // Authorization check: Ensure the recruiter owns this job
+    if (job.postedBy.toString() !== recruiterId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this job." });
+    }
+
+    // Delete related applications first to maintain data integrity
+    await Application.deleteMany({ job: jobId });
+
+    // Delete the job
+    await Job.findByIdAndDelete(jobId);
+
+    res.status(200).json({ message: "Job deleted successfully!" });
+  } catch (err) {
+    console.error("Error deleting job:", err);
+    res.status(500).json({ message: "Server error while deleting job." });
+  }
+};
+
 module.exports = {
   getSignUpPage,
   getLoginPage,
@@ -254,6 +349,9 @@ module.exports = {
   login,
   postJob,
   getMyPostedJobs,
+  getJobById, // Export the new function
   getApplicantsForJob,
-  updateApplicationStatus, // Export the new function
+  updateApplicationStatus,
+  editJob,
+  deleteJob,
 };

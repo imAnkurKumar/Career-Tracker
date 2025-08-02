@@ -20,12 +20,23 @@ router.get(
   authenticateToken,
   recruitersController.getApplicantsForJob
 );
-
-// New route to update application status, protected by authentication
 router.patch(
   "/applications/:applicationId/status",
   authenticateToken,
   recruitersController.updateApplicationStatus
+);
+
+router.get(
+  "/my-jobs/:jobId",
+  authenticateToken,
+  recruitersController.getJobById
+);
+
+router.patch("/jobs/:jobId", authenticateToken, recruitersController.editJob);
+router.delete(
+  "/jobs/:jobId",
+  authenticateToken,
+  recruitersController.deleteJob
 );
 
 module.exports = router;

@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
 
     const title = document.getElementById("jobTitle").value.trim();
-    const company = document.getElementById("companyName").value.trim(); // Corrected typo and added trim
+    const company = document.getElementById("companyName").value.trim();
     const location = document.getElementById("jobLocation").value.trim();
     const description = document.getElementById("jobDescription").value.trim();
     const requirements = document
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.message || "Failed to post job."));
       }
     } catch (error) {
-      console.error("An error occurred while posting the job:", error); // More specific console log
+      console.error("An error occurred while posting the job:", error);
       alert("An error occurred while posting the job.");
     }
   }
@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.message || "Failed to load your posted jobs."));
       }
     } catch (error) {
-      console.error("An error occurred while fetching your jobs:", error); // More specific console log
+      console.error("An error occurred while fetching your jobs:", error);
       jobListingsContainer.innerHTML = `<div>An error occurred while fetching your jobs.</div>`;
       alert("An error occurred while fetching your jobs.");
     }
@@ -267,22 +267,170 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".edit-job-btn").forEach((button) => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
-        alert(
-          `Edit Job ID: ${button.dataset.jobId} (Feature to be implemented)`
-        );
+        // Call a function to load the edit form for this job
+        loadEditJobForm(jobId);
       });
     });
 
     document.querySelectorAll(".delete-job-btn").forEach((button) => {
-      button.addEventListener("click", (e) => {
+      button.addEventListener("click", async (e) => {
+        // Made async
         const jobId = e.target.dataset.jobId;
-        if (confirm(`Are you sure you want to delete this job?`)) {
-          alert(
-            `Deleting Job ID: ${button.dataset.jobId} (Feature to be implemented)`
-          );
+        if (
+          confirm(
+            `Are you sure you want to delete this job? This action cannot be undone.`
+          )
+        ) {
+          try {
+            const response = await fetch(`/recruiter/jobs/${jobId}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            });
+            const data = await response.json();
+            if (response.ok) {
+              alert(data.message);
+              loadMyPostedJobs(); // Refresh the list after deletion
+            } else {
+              alert(
+                "Error deleting job: " + (data.message || "Unknown error.")
+              );
+            }
+          } catch (error) {
+            console.error("Error deleting job:", error);
+            alert("An error occurred while deleting the job.");
+          }
         }
       });
     });
+  }
+
+  /**
+   * Loads and displays the edit job form for a specific job.
+   * @param {string} jobId - The ID of the job to edit.
+   */
+  async function loadEditJobForm(jobId) {
+    // First, fetch the job details to pre-fill the form
+    try {
+      const response = await fetch(`/recruiter/my-jobs/${jobId}`, {
+        // Assuming a new endpoint to get a single job by ID
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.job) {
+        alert(
+          "Error fetching job details for editing: " +
+            (data.message || "Job not found.")
+        );
+        return;
+      }
+
+      const job = data.job;
+
+      // Show the post job section (re-using its HTML structure)
+      showSection(postJobSection, `Edit Job: ${job.title}`);
+      setActiveLink(document.getElementById("postJobBtn")); // Highlight "Post Job" as we're using its form
+
+      // Populate the form fields with current job data
+      document.getElementById("jobTitle").value = job.title;
+      document.getElementById("companyName").value = job.company;
+      document.getElementById("jobLocation").value = job.location;
+      document.getElementById("jobDescription").value = job.description;
+      document.getElementById("jobRequirements").value = job.requirements;
+      document.getElementById("jobSalary").value = job.salary || "";
+      document.getElementById("jobType").value = job.type;
+
+      // Change the form's submit button text and add a data attribute for the job ID
+      const postJobForm = document.getElementById("postJobForm");
+      const submitButton = postJobForm.querySelector('button[type="submit"]');
+      submitButton.innerText = "Save Changes";
+      submitButton.dataset.jobId = jobId; // Store job ID on the button
+
+      // Change the form's event listener to handle update instead of post
+      postJobForm.removeEventListener("submit", handlePostJob); // Remove old listener
+      postJobForm.addEventListener("submit", handleUpdateJob); // Add new listener for update
+    } catch (error) {
+      console.error("Error loading edit job form:", error);
+      alert("An error occurred while loading the edit form.");
+    }
+  }
+
+  /**
+   * Handles the submission of the updated job form.
+   * This function is dynamically attached when editing a job.
+   * @param {Event} event - The form submission event.
+   */
+  async function handleUpdateJob(event) {
+    event.preventDefault();
+
+    const jobId = event.submitter.dataset.jobId; // Get job ID from the submit button's data attribute
+
+    const title = document.getElementById("jobTitle").value.trim();
+    const company = document.getElementById("companyName").value.trim();
+    const location = document.getElementById("jobLocation").value.trim();
+    const description = document.getElementById("jobDescription").value.trim();
+    const requirements = document
+      .getElementById("jobRequirements")
+      .value.trim();
+    const salary = document.getElementById("jobSalary").value.trim();
+    const type = document.getElementById("jobType").value;
+
+    if (!title || !company || !location || !description || !requirements) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/recruiter/jobs/${jobId}`, {
+        method: "PATCH", // Use PATCH for updating
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          title,
+          company,
+          location,
+          description,
+          requirements,
+          salary,
+          type,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message);
+        // Reset form to original "Post Job" state
+        document.getElementById("postJobForm").reset();
+        const submitButton = document
+          .getElementById("postJobForm")
+          .querySelector('button[type="submit"]');
+        submitButton.innerText = "🚀 Post Job";
+        delete submitButton.dataset.jobId; // Remove job ID from button
+
+        // Re-attach original handlePostJob listener
+        document
+          .getElementById("postJobForm")
+          .removeEventListener("submit", handleUpdateJob);
+        document
+          .getElementById("postJobForm")
+          .addEventListener("submit", handlePostJob);
+
+        document.getElementById("myPostedJobsBtn").click(); // Go back to my posted jobs
+      } else {
+        alert("Error updating job: " + (data.message || "Unknown error."));
+      }
+    } catch (error) {
+      console.error("Error updating job:", error);
+      alert("An error occurred while updating the job.");
+    }
   }
 
   /**
@@ -354,7 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.message || "Failed to load applicants."));
       }
     } catch (error) {
-      console.error("An error occurred while fetching applicants:", error); // More specific console log
+      console.error("An error occurred while fetching applicants:", error);
       applicantsListContainer.innerHTML = `<p>An error occurred while fetching applicants.</p>`;
       alert("An error occurred while fetching applicants.");
     }
@@ -367,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".update-status-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
         const applicationId = e.target.dataset.applicationId;
-        const currentStatus = e.target.dataset.currentStatus; // Corrected: Use dataset.currentStatus
+        const currentStatus = e.target.dataset.currentStatus;
         const parentJobId = e.target.closest(".applicant-card").dataset.jobId; // Get job ID from parent card
 
         // Prompt for new status
@@ -407,13 +555,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           );
 
-          const data = await response.json();
+          const data = response.json(); // Don't await here, await on data.json()
 
           if (response.ok) {
             alert(data.message);
             // Re-load the specific applicants list to reflect the change
-            // Use the globally stored currentViewedJobId and currentViewedJobTitle
-            // Or, even better, use parentJobId and currentViewedJobTitle
             loadApplicantsForJob(parentJobId, currentViewedJobTitle); // Use parentJobId for robustness
           } else {
             alert(
@@ -422,7 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
           }
         } catch (error) {
-          console.error("An error occurred while updating the status:", error); // More specific console log
+          console.error("An error occurred while updating the status:", error);
           alert("An error occurred while updating the status.");
         }
       });
