@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     enum: ["job_seeker", "employer", "admin"],
     default: "job_seeker",
   },
+  resumeUrl: {
+    type: String,
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

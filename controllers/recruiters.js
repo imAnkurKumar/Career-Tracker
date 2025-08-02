@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Job = require("../models/job");
+const Application = require("../models/application"); // Import the Application model
 const jwt = require("jsonwebtoken");
 const path = require("path");
 
@@ -24,7 +25,7 @@ const getRecruiterDashboard = (req, res, next) => {
 
 const signUp = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body; // Remove role from destructuring, set explicitly below
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Please fill in all fields" });
@@ -40,7 +41,7 @@ const signUp = async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
-      role: "employer", // Explicitly set role for recruiter sign-up
+      role: "employer",
     });
     await user.save();
 
@@ -55,8 +56,6 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-
-    // Check if user exists and if their role is 'employer'
     if (!user || user.role !== "employer") {
       return res
         .status(401)
@@ -69,7 +68,7 @@ const login = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role }, // Include role in token payload
+      { userId: user._id, role: user.role },
       process.env.TOKEN_SECRET,
       {
         expiresIn: "2h",
@@ -103,10 +102,8 @@ const postJob = async (req, res, next) => {
       type,
     } = req.body;
 
-    // The user ID is available from the authenticated token
     const postedBy = req.user.userId;
 
-    // Basic validation
     if (
       !title ||
       !company ||
@@ -141,7 +138,7 @@ const postJob = async (req, res, next) => {
 
 const getMyPostedJobs = async (req, res, next) => {
   try {
-    const recruiterId = req.user.userId; // Get recruiter ID from authenticated token
+    const recruiterId = req.user.userId;
     const jobs = await Job.find({ postedBy: recruiterId }).sort({
       postedAt: -1,
     });
@@ -157,6 +154,98 @@ const getMyPostedJobs = async (req, res, next) => {
   }
 };
 
+const getApplicantsForJob = async (req, res, next) => {
+  try {
+    const jobId = req.params.jobId;
+    const recruiterId = req.user.userId;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+    if (job.postedBy.toString() !== recruiterId) {
+      return res
+        .status(403)
+        .json({
+          message: "You are not authorized to view applicants for this job.",
+        });
+    }
+
+    const applications = await Application.find({ job: jobId })
+      .populate("jobSeeker", "name email resumeUrl")
+      .sort({ appliedAt: 1 });
+
+    if (!applications || applications.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No applicants for this job yet.", applicants: [] });
+    }
+
+    res.status(200).json({ applicants: applications });
+  } catch (err) {
+    console.error("Error fetching applicants for job:", err);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching applicants." });
+  }
+};
+
+const updateApplicationStatus = async (req, res, next) => {
+  try {
+    const { applicationId } = req.params; // Get application ID from URL parameters
+    const { status } = req.body; // Get new status from request body
+    const recruiterId = req.user.userId; // Get recruiter ID from authenticated token
+
+    // Validate the new status against the enum in the Application model
+    const validStatuses = [
+      "Pending",
+      "Reviewed",
+      "Interviewed",
+      "Rejected",
+      "Hired",
+    ];
+    if (!validStatuses.includes(status)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid application status provided." });
+    }
+
+    // Find the application and populate the job to check ownership
+    const application = await Application.findById(applicationId).populate(
+      "job"
+    );
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found." });
+    }
+
+    // Ensure the recruiter owns the job associated with this application
+    if (application.job.postedBy.toString() !== recruiterId) {
+      return res
+        .status(403)
+        .json({
+          message: "You are not authorized to update this application.",
+        });
+    }
+
+    // Update the application status
+    application.status = status;
+    await application.save();
+
+    res
+      .status(200)
+      .json({
+        message: "Application status updated successfully!",
+        application,
+      });
+  } catch (err) {
+    console.error("Error updating application status:", err);
+    res
+      .status(500)
+      .json({ message: "Server error while updating application status." });
+  }
+};
+
 module.exports = {
   getSignUpPage,
   getLoginPage,
@@ -165,4 +254,6 @@ module.exports = {
   login,
   postJob,
   getMyPostedJobs,
+  getApplicantsForJob,
+  updateApplicationStatus, // Export the new function
 };

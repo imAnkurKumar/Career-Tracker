@@ -8,38 +8,67 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
       rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap"
+      rel="stylesheet" />
   </head>
   <body>
     <div class="dashboard-container">
-      <aside class="sidebar">
-        <div class="logo">CareerTrack</div>
-        <nav class="sidebar-nav">
-          <ul>
-            <li>
-              <a href="#" id="viewJobsBtn" data-section="browse-jobs"
-                >🔍 Browse Jobs</a
-              >
-            </li>
-            <li>
-              <a href="#" id="myApplicationsBtn" data-section="my-applications"
-                >📌 My Applications</a
-              >
-            </li>
-            <li>
-              <a href="#" id="profileBtn" data-section="profile">👤 Profile</a>
-            </li>
-            <li><a href="#" id="logoutBtn">🚪 Logout</a></li>
-          </ul>
-        </nav>
-      </aside>
+      <!-- Sidebar -->
+      <nav class="sidebar">
+        <div class="logo">JobPortal</div>
+        <ul class="sidebar-nav">
+          <li>
+            <a id="viewJobsBtn" class="active" href="#">🔎 Browse Jobs</a>
+          </li>
+          <li><a id="myApplicationsBtn" href="#">📝 My Applications</a></li>
+          <li><a id="profileBtn" href="#">👤 Profile</a></li>
+          <li style="margin-top: auto">
+            <button id="logoutBtn" class="logout-btn">⏻ Logout</button>
+          </li>
+        </ul>
+      </nav>
 
+      <!-- Main Content -->
       <main class="main-content">
-        <h1 id="sectionTitle">Welcome to CareerTrack!</h1>
-        <div id="dashboardContent">
-          <p>
-            Please select an option from the sidebar to view your information.
-          </p>
-        </div>
+        <h1 id="sectionTitle">Available Jobs</h1>
+
+        <!-- Browse Jobs Section -->
+        <section class="dashboard-section" id="availableJobsSection">
+          <div id="jobsList"></div>
+        </section>
+
+        <!-- Applications Section -->
+        <section class="dashboard-section hidden" id="myApplicationsSection">
+          <div id="applicationsList"></div>
+        </section>
+
+        <!-- Profile Section -->
+        <section class="dashboard-section hidden" id="profileSection">
+          <div class="profile-details">
+            <h2>Profile Info</h2>
+            <div class="profile-row">
+              <b>Name:</b> <span id="profileName">-</span>
+            </div>
+            <div class="profile-row">
+              <b>Email:</b> <span id="profileEmail">-</span>
+            </div>
+            <div class="profile-row">
+              <b>Resume:</b>
+              <span id="currentResumeLink">No resume uploaded yet.</span>
+            </div>
+          </div>
+          <hr class="profile-hr" />
+          <form
+            id="resumeUploadForm"
+            class="form-container"
+            enctype="multipart/form-data">
+            <label for="resumeFile"><b>Upload Resume (PDF/DOC):</b></label>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" />
+            <button type="submit">⬆️ Upload Resume</button>
+            <span id="resumeStatus"></span>
+          </form>
+        </section>
       </main>
     </div>
 
