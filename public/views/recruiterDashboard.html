@@ -30,7 +30,6 @@
 
         <!-- Post Job Section -->
         <section class="dashboard-section hidden" id="postJobSection">
-          <!-- Added hidden class -->
           <form id="postJobForm" class="form-container">
             <div class="input-group">
               <label for="jobTitle">Job Title</label>
@@ -39,7 +38,6 @@
                 id="jobTitle"
                 placeholder="e.g. Senior Developer"
                 required />
-              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="companyName">Company Name</label>
@@ -48,7 +46,6 @@
                 id="companyName"
                 placeholder="e.g. Acme Corp"
                 required />
-              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobLocation">Location</label>
@@ -57,7 +54,6 @@
                 id="jobLocation"
                 placeholder="e.g. Remote, New York"
                 required />
-              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobDescription">Job Description</label>
@@ -66,23 +62,30 @@
                 rows="3"
                 placeholder="Short job description"
                 required></textarea>
-              <!-- Added required -->
             </div>
             <div class="input-group">
               <label for="jobRequirements">Requirements</label>
               <textarea
                 id="jobRequirements"
                 rows="2"
-                placeholder="Key skills, experience..."
+                placeholder="Key skills and experience..."
                 required></textarea>
-              <!-- Added required -->
             </div>
             <div class="input-group">
-              <label for="jobSalary">Salary (optional)</label>
+              <label for="minJobSalary">Minimum Salary (USD)</label>
               <input
-                type="text"
-                id="jobSalary"
-                placeholder="e.g., $60,000 - $80,000" />
+                type="number"
+                id="minJobSalary"
+                placeholder="e.g., 60000"
+                min="0" />
+            </div>
+            <div class="input-group">
+              <label for="maxJobSalary">Maximum Salary (USD)</label>
+              <input
+                type="number"
+                id="maxJobSalary"
+                placeholder="e.g., 80000"
+                min="0" />
             </div>
             <div class="input-group">
               <label for="jobType">Job Type</label>

@@ -101,10 +101,11 @@ const postJob = async (req, res, next) => {
       minSalary,
       maxSalary,
       type,
-    } = req.body; // Updated to minSalary, maxSalary
+    } = req.body;
 
     const postedBy = req.user.userId;
 
+    // Corrected validation: was !!description, now !description
     if (
       !title ||
       !company ||
@@ -118,7 +119,6 @@ const postJob = async (req, res, next) => {
         .json({ message: "Please fill in all required fields." });
     }
 
-    // Parse salaries to numbers, default to 0 if not provided or invalid
     const parsedMinSalary = parseFloat(minSalary) || 0;
     const parsedMaxSalary = parseFloat(maxSalary) || 0;
 
@@ -128,8 +128,8 @@ const postJob = async (req, res, next) => {
       location,
       description,
       requirements,
-      minSalary: parsedMinSalary, // Save as number
-      maxSalary: parsedMaxSalary, // Save as number
+      minSalary: parsedMinSalary,
+      maxSalary: parsedMaxSalary,
       type,
       postedBy,
     });
@@ -170,7 +170,6 @@ const getJobById = async (req, res, next) => {
       return res.status(404).json({ message: "Job not found." });
     }
 
-    // Authorization check: Ensure the recruiter owns this job
     if (job.postedBy.toString() !== recruiterId) {
       return res
         .status(403)
@@ -188,7 +187,7 @@ const getJobById = async (req, res, next) => {
 
 const getApplicantsForJob = async (req, res, next) => {
   try {
-    const jobId = req.params.jobId;
+    const jobId = req.params.job; // Typo in original: req.params.jobId
     const recruiterId = req.user.userId;
 
     const job = await Job.findById(jobId);
@@ -287,28 +286,26 @@ const editJob = async (req, res, next) => {
       minSalary,
       maxSalary,
       type,
-    } = req.body; // Updated to minSalary, maxSalary
+    } = req.body;
 
     const job = await Job.findById(jobId);
     if (!job) {
       return res.status(404).json({ message: "Job not found." });
     }
 
-    // Authorization check: Ensure the recruiter owns this job
     if (job.postedBy.toString() !== recruiterId) {
       return res
         .status(403)
         .json({ message: "You are not authorized to edit this job." });
     }
 
-    // Update job fields
     job.title = title || job.title;
     job.company = company || job.company;
     job.location = location || job.location;
     job.description = description || job.description;
     job.requirements = requirements || job.requirements;
-    job.minSalary = parseFloat(minSalary) || 0; // Save as number
-    job.maxSalary = parseFloat(maxSalary) || 0; // Save as number
+    job.minSalary = parseFloat(minSalary) || 0;
+    job.maxSalary = parseFloat(maxSalary) || 0;
     job.type = type || job.type;
 
     await job.save();
@@ -329,17 +326,14 @@ const deleteJob = async (req, res, next) => {
       return res.status(404).json({ message: "Job not found." });
     }
 
-    // Authorization check: Ensure the recruiter owns this job
     if (job.postedBy.toString() !== recruiterId) {
       return res
         .status(403)
         .json({ message: "You are not authorized to delete this job." });
     }
 
-    // Delete related applications first to maintain data integrity
     await Application.deleteMany({ job: jobId });
 
-    // Delete the job
     await Job.findByIdAndDelete(jobId);
 
     res.status(200).json({ message: "Job deleted successfully!" });

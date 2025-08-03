@@ -27,11 +27,11 @@ const getJobs = async (req, res, next) => {
 
     // --- Filtering Parameters ---
     const { search, location, type, minSalary, maxSalary } = req.query;
-    const query = {}; // Initialize an empty query object
+    const query = {};
 
     // Keyword search (title, description, requirements, company)
     if (search) {
-      const searchRegex = new RegExp(search, "i"); // Case-insensitive regex
+      const searchRegex = new RegExp(search, "i");
       query.$or = [
         { title: searchRegex },
         { description: searchRegex },
@@ -45,38 +45,43 @@ const getJobs = async (req, res, next) => {
       query.location = new RegExp(location, "i");
     }
 
-    // Type filter (e.g., Full-time, Part-time)
+    // Type filter
     if (type && type !== "All") {
-      // 'All' option will mean no filter
       query.type = type;
     }
 
-    // Robust Salary range filter (now that salary is numeric)
+    // Robust Salary range filter
     if (minSalary || maxSalary) {
-      query.$and = query.$and || []; // Ensure $and array exists
+      // Ensure the salary ranges of the job overlap with the filter range
+      // Job's maxSalary >= filter's minSalary AND Job's minSalary <= filter's maxSalary
+      const salaryConditions = [];
 
       if (minSalary) {
         const parsedMinSalary = parseFloat(minSalary);
         if (!isNaN(parsedMinSalary)) {
-          // Find jobs where the job's maxSalary is >= the filter's minSalary
-          query.$and.push({ maxSalary: { $gte: parsedMinSalary } });
+          salaryConditions.push({ maxSalary: { $gte: parsedMinSalary } });
         }
       }
       if (maxSalary) {
         const parsedMaxSalary = parseFloat(maxSalary);
         if (!isNaN(parsedMaxSalary)) {
-          // Find jobs where the job's minSalary is <= the filter's maxSalary
-          query.$and.push({ minSalary: { $lte: parsedMaxSalary } });
+          salaryConditions.push({ minSalary: { $lte: parsedMaxSalary } });
         }
+      }
+
+      if (salaryConditions.length > 0) {
+        query.$and = query.$and
+          ? [...query.$and, ...salaryConditions]
+          : salaryConditions;
       }
     }
 
-    const jobs = await Job.find(query) // Apply filters here
+    const jobs = await Job.find(query)
       .sort({ postedAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalJobs = await Job.countDocuments(query); // Count documents matching the filters
+    const totalJobs = await Job.countDocuments(query);
     const totalPages = Math.ceil(totalJobs / limit);
 
     res.status(200).json({
@@ -256,7 +261,6 @@ const uploadResume = async (req, res, next) => {
     });
   } catch (err) {
     console.error("Error uploading resume:", err);
-    // Handle specific errors from multer or S3 if needed
     if (
       err.message === "Invalid file type. Only PDF and DOCX files are allowed."
     ) {

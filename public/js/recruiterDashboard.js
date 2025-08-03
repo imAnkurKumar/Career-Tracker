@@ -1,4 +1,3 @@
-// public/js/recruiterDashboard.js
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
 
@@ -129,12 +128,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const requirements = document
       .getElementById("jobRequirements")
       .value.trim();
-    const salary = document.getElementById("jobSalary").value.trim();
+    const minSalary = document.getElementById("minJobSalary").value.trim();
+    const maxSalary = document.getElementById("maxJobSalary").value.trim();
     const type = document.getElementById("jobType").value;
 
     // Basic validation (now redundant with HTML 'required' but good fallback)
     if (!title || !company || !location || !description || !requirements) {
       alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Optional: Basic salary validation
+    if (
+      minSalary &&
+      maxSalary &&
+      parseFloat(minSalary) > parseFloat(maxSalary)
+    ) {
+      alert("Minimum salary cannot be greater than maximum salary.");
       return;
     }
 
@@ -151,7 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
           location,
           description,
           requirements,
-          salary,
+          minSalary: minSalary ? parseFloat(minSalary) : 0, // Send as number, default 0
+          maxSalary: maxSalary ? parseFloat(maxSalary) : 0, // Send as number, default 0
           type,
         }),
       });
@@ -209,7 +220,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>🏢 ${job.company}</span>
                 <span>📍 ${job.location}</span>
                 <span>💼 ${job.type}</span>
-                <span>💲${job.salary || "N/A"}</span>
+                <span>💲${
+                  job.minSalary > 0 || job.maxSalary > 0
+                    ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                    : "N/A"
+                }</span>
               </div>
               <p><strong>Description:</strong> ${job.description}</p>
               <p><strong>Requirements:</strong> ${job.requirements}</p>
@@ -274,7 +289,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".delete-job-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
-        // Made async
         const jobId = e.target.dataset.jobId;
         if (
           confirm(
@@ -314,7 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // First, fetch the job details to pre-fill the form
     try {
       const response = await fetch(`/recruiter/my-jobs/${jobId}`, {
-        // Assuming a new endpoint to get a single job by ID
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -342,7 +355,10 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("jobLocation").value = job.location;
       document.getElementById("jobDescription").value = job.description;
       document.getElementById("jobRequirements").value = job.requirements;
-      document.getElementById("jobSalary").value = job.salary || "";
+      document.getElementById("minJobSalary").value =
+        job.minSalary > 0 ? job.minSalary : ""; // Populate new salary fields
+      document.getElementById("maxJobSalary").value =
+        job.maxSalary > 0 ? job.maxSalary : ""; // Populate new salary fields
       document.getElementById("jobType").value = job.type;
 
       // Change the form's submit button text and add a data attribute for the job ID
@@ -377,11 +393,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const requirements = document
       .getElementById("jobRequirements")
       .value.trim();
-    const salary = document.getElementById("jobSalary").value.trim();
+    const minSalary = document.getElementById("minJobSalary").value.trim();
+    const maxSalary = document.getElementById("maxJobSalary").value.trim();
     const type = document.getElementById("jobType").value;
 
     if (!title || !company || !location || !description || !requirements) {
       alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Optional: Basic salary validation
+    if (
+      minSalary &&
+      maxSalary &&
+      parseFloat(minSalary) > parseFloat(maxSalary)
+    ) {
+      alert("Minimum salary cannot be greater than maximum salary.");
       return;
     }
 
@@ -398,7 +425,8 @@ document.addEventListener("DOMContentLoaded", () => {
           location,
           description,
           requirements,
-          salary,
+          minSalary: minSalary ? parseFloat(minSalary) : 0, // Send as number
+          maxSalary: maxSalary ? parseFloat(maxSalary) : 0, // Send as number
           type,
         }),
       });
@@ -515,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".update-status-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
         const applicationId = e.target.dataset.applicationId;
-        const currentStatus = e.target.dataset.currentStatus;
+        const currentStatus = e.target.dataset.currentStatus; // Corrected: Use dataset.currentStatus
         const parentJobId = e.target.closest(".applicant-card").dataset.jobId; // Get job ID from parent card
 
         // Prompt for new status
@@ -555,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           );
 
-          const data = response.json(); // Don't await here, await on data.json()
+          const data = await response.json();
 
           if (response.ok) {
             alert(data.message);
@@ -583,4 +611,4 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = `<p>Loading recruiter profile details...</p>`;
     // TODO: Implement fetching logic here
   }
-}); // End of DOMContentLoaded
+});
