@@ -190,11 +190,9 @@ const getApplicantsForJob = async (req, res, next) => {
       return res.status(404).json({ message: "Job not found." });
     }
     if (job.postedBy.toString() !== recruiterId) {
-      return res
-        .status(403)
-        .json({
-          message: "You are not authorized to view applicants for this job.",
-        });
+      return res.status(403).json({
+        message: "You are not authorized to view applicants for this job.",
+      });
     }
 
     const applications = await Application.find({ job: jobId })
@@ -244,22 +242,18 @@ const updateApplicationStatus = async (req, res, next) => {
     }
 
     if (application.job.postedBy.toString() !== recruiterId) {
-      return res
-        .status(403)
-        .json({
-          message: "You are not authorized to update this application.",
-        });
+      return res.status(403).json({
+        message: "You are not authorized to update this application.",
+      });
     }
 
     application.status = status;
     await application.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Application status updated successfully!",
-        application,
-      });
+    res.status(200).json({
+      message: "Application status updated successfully!",
+      application,
+    });
   } catch (err) {
     console.error("Error updating application status:", err);
     res
@@ -349,7 +343,7 @@ module.exports = {
   login,
   postJob,
   getMyPostedJobs,
-  getJobById, // Export the new function
+  getJobById,
   getApplicantsForJob,
   updateApplicationStatus,
   editJob,

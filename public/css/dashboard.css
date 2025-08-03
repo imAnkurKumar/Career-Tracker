@@ -136,6 +136,51 @@ body {
   display: none !important;
 }
 
+/* New: Top controls for pagination/filtering */
+.controls-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--medium-gray);
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: 10px; /* Space between items */
+}
+
+.items-per-page-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.items-per-page-control label {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.items-per-page-control select {
+  padding: 6px 10px;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--white);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.items-per-page-control select:focus {
+  border-color: var(--primary-blue);
+  outline: none;
+}
+
+.total-count {
+  font-weight: 600;
+  color: var(--dark-blue);
+  font-size: 0.95rem;
+}
+
 /* New: Grid for Job Listings and Applications */
 .jobs-grid {
   display: grid;
@@ -310,6 +355,42 @@ body {
   margin-top: 1rem; /* Approx 16px */
 }
 
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid var(--medium-gray);
+}
+
+.pagination-controls button {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: var(--hover-light);
+}
+
+.pagination-controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls span {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .dashboard-container {
@@ -425,6 +506,13 @@ body {
   .job-actions button {
     width: 100%;
   }
+  .pagination-controls {
+    flex-wrap: wrap; /* Allow pagination buttons to wrap */
+    gap: 5px;
+  }
+  .pagination-controls button {
+    padding: 6px 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -441,6 +529,6 @@ body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-blue); /* Use primary-blue for consistency */
+  background: var(--primary-blue); /* Consistent with primary-blue */
   border-radius: 4px;
 }

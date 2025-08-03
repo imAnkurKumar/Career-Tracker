@@ -8,67 +8,122 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
       rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap"
-      rel="stylesheet" />
   </head>
   <body>
     <div class="dashboard-container">
-      <!-- Sidebar -->
-      <nav class="sidebar">
-        <div class="logo">JobPortal</div>
-        <ul class="sidebar-nav">
-          <li>
-            <a id="viewJobsBtn" class="active" href="#">🔎 Browse Jobs</a>
-          </li>
-          <li><a id="myApplicationsBtn" href="#">📝 My Applications</a></li>
-          <li><a id="profileBtn" href="#">👤 Profile</a></li>
-          <li style="margin-top: auto">
-            <button id="logoutBtn" class="logout-btn">⏻ Logout</button>
-          </li>
-        </ul>
-      </nav>
+      <aside class="sidebar">
+        <div class="logo">CareerTrack</div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="#" id="viewJobsBtn" data-section="browse-jobs"
+                >🔍 Browse Jobs</a
+              >
+            </li>
+            <li>
+              <a href="#" id="myApplicationsBtn" data-section="my-applications"
+                >📌 My Applications</a
+              >
+            </li>
+            <li>
+              <a href="#" id="profileBtn" data-section="profile">👤 Profile</a>
+            </li>
+            <li><a href="#" id="logoutBtn">🚪 Logout</a></li>
+          </ul>
+        </nav>
+      </aside>
 
-      <!-- Main Content -->
       <main class="main-content">
-        <h1 id="sectionTitle">Available Jobs</h1>
-
-        <!-- Browse Jobs Section -->
-        <section class="dashboard-section" id="availableJobsSection">
-          <div id="jobsList"></div>
-        </section>
-
-        <!-- Applications Section -->
-        <section class="dashboard-section hidden" id="myApplicationsSection">
-          <div id="applicationsList"></div>
-        </section>
-
-        <!-- Profile Section -->
-        <section class="dashboard-section hidden" id="profileSection">
-          <div class="profile-details">
-            <h2>Profile Info</h2>
-            <div class="profile-row">
-              <b>Name:</b> <span id="profileName">-</span>
+        <h1 id="sectionTitle">Welcome to CareerTrack!</h1>
+        <div id="dashboardContent">
+          <!-- Available Jobs Section (Default View) -->
+          <div id="availableJobsSection" class="dashboard-section active">
+            <h2>Available Jobs</h2>
+            <div class="controls-top">
+              <div class="items-per-page-control">
+                <label for="jobsPerPageSelect">Jobs per page:</label>
+                <select id="jobsPerPageSelect">
+                  <option value="5">5</option>
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+              <span id="totalJobsCount" class="total-count">Total Jobs: 0</span>
             </div>
-            <div class="profile-row">
-              <b>Email:</b> <span id="profileEmail">-</span>
+            <div id="jobsList" class="jobs-grid">
+              <!-- Jobs will be loaded here by JavaScript -->
+              <p>Loading available jobs...</p>
             </div>
-            <div class="profile-row">
-              <b>Resume:</b>
-              <span id="currentResumeLink">No resume uploaded yet.</span>
+            <div id="paginationControls" class="pagination-controls">
+              <!-- Pagination buttons for jobs will be rendered here by JavaScript -->
             </div>
           </div>
-          <hr class="profile-hr" />
-          <form
-            id="resumeUploadForm"
-            class="form-container"
-            enctype="multipart/form-data">
-            <label for="resumeFile"><b>Upload Resume (PDF/DOC):</b></label>
-            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" />
-            <button type="submit">⬆️ Upload Resume</button>
-            <span id="resumeStatus"></span>
-          </form>
-        </section>
+
+          <!-- My Applications Section (Initially Hidden) -->
+          <div id="myApplicationsSection" class="dashboard-section hidden">
+            <h2>My Applications</h2>
+            <div class="controls-top">
+              <div class="items-per-page-control">
+                <label for="applicationsPerPageSelect">Apps per page:</label>
+                <select id="applicationsPerPageSelect">
+                  <option value="5">5</option>
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+              <span id="totalApplicationsCount" class="total-count"
+                >Total Applications: 0</span
+              >
+            </div>
+            <div id="applicationsList" class="jobs-grid">
+              <!-- Applications will be loaded here by JavaScript -->
+              <p>Your applications will appear here.</p>
+            </div>
+            <div
+              id="paginationControlsApplications"
+              class="pagination-controls">
+              <!-- Pagination buttons for applications will be rendered here by JavaScript -->
+            </div>
+          </div>
+
+          <!-- My Profile Section (Initially Hidden) -->
+          <div id="profileSection" class="dashboard-section hidden">
+            <h2>My Profile</h2>
+            <div id="profileDetails">
+              <!-- Profile details will be loaded here by JavaScript -->
+              <p>Loading profile details...</p>
+              <div class="profile-card">
+                <h3>Personal Information</h3>
+                <p><strong>Name:</strong> <span id="profileName"></span></p>
+                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+              </div>
+
+              <div class="profile-card">
+                <h3>Resume Management</h3>
+                <form id="resumeUploadForm" enctype="multipart/form-data">
+                  <div class="input-group">
+                    <label for="resumeFile"
+                      >Upload/Update Resume (PDF, DOCX - Max 5MB)</label
+                    >
+                    <input
+                      type="file"
+                      id="resumeFile"
+                      name="resume"
+                      accept=".pdf,.docx" />
+                  </div>
+                  <button type="submit">Upload Resume</button>
+                </form>
+                <div id="resumeStatus" class="status-message"></div>
+                <div id="currentResumeContainer" class="mt-4">
+                  <h4>Current Resume:</h4>
+                  <p id="currentResumeLink">No resume uploaded yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
 

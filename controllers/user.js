@@ -21,8 +21,25 @@ const getLoginPage = (req, res, next) => {
 
 const getJobs = async (req, res, next) => {
   try {
-    const jobs = await Job.find().sort({ postedAt: -1 });
-    res.status(200).json({ jobs });
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 jobs per page
+    const skip = (page - 1) * limit;
+
+    const jobs = await Job.find()
+      .sort({ postedAt: -1 }) // Sort by newest first
+      .skip(skip)
+      .limit(limit);
+
+    const totalJobs = await Job.countDocuments(); // Get total count of all jobs
+    const totalPages = Math.ceil(totalJobs / limit);
+
+    res.status(200).json({
+      jobs,
+      currentPage: page,
+      totalPages,
+      totalJobs,
+      jobsPerPage: limit,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error while fetching jobs." });
@@ -135,18 +152,30 @@ const applyForJob = async (req, res, next) => {
 
 const getMyApplications = async (req, res, next) => {
   try {
-    const jobSeekerId = req.user._id;
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 applications per page
+    const skip = (page - 1) * limit;
+
+    const jobSeekerId = req.user._id; // Get job seeker ID from authenticated token
+
     const applications = await Application.find({ jobSeeker: jobSeekerId })
-      .populate("job")
-      .sort({ appliedAt: -1 });
+      .populate("job") // Populate the job details
+      .sort({ appliedAt: -1 }) // Sort by most recent application
+      .skip(skip)
+      .limit(limit);
 
-    if (!applications || applications.length === 0) {
-      return res
-        .status(200)
-        .json({ message: "No applications found.", applications: [] });
-    }
+    const totalApplications = await Application.countDocuments({
+      jobSeeker: jobSeekerId,
+    }); // Get total count of user's applications
+    const totalPages = Math.ceil(totalApplications / limit);
 
-    res.status(200).json({ applications });
+    res.status(200).json({
+      applications,
+      currentPage: page,
+      totalPages,
+      totalApplications,
+      applicationsPerPage: limit,
+    });
   } catch (err) {
     console.error("Error fetching applications:", err);
     res
@@ -161,13 +190,14 @@ const uploadResume = async (req, res, next) => {
       return res.status(400).json({ message: "No file uploaded." });
     }
 
-    const userId = req.user._id;
-    const resumeUrl = req.file.location;
+    const userId = req.user._id; // Get user ID from authenticated token
+    const resumeUrl = req.file.location; // S3 URL provided by multer-s3
 
+    // Find the user and update their resumeUrl
     const user = await User.findByIdAndUpdate(
       userId,
       { resumeUrl: resumeUrl },
-      { new: true }
+      { new: true } // Return the updated document
     );
 
     if (!user) {
@@ -180,6 +210,7 @@ const uploadResume = async (req, res, next) => {
     });
   } catch (err) {
     console.error("Error uploading resume:", err);
+    // Handle specific errors from multer or S3 if needed
     if (
       err.message === "Invalid file type. Only PDF and DOCX files are allowed."
     ) {
@@ -217,5 +248,5 @@ module.exports = {
   applyForJob,
   getMyApplications,
   uploadResume,
-  getUserProfile, // Export the new function
+  getUserProfile,
 };

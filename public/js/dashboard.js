@@ -18,9 +18,30 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const profileSection = document.getElementById("profileSection");
 
-  const jobsListContainer = document.getElementById("jobsList"); // Renamed for clarity
-  const applicationsListContainer = document.getElementById("applicationsList"); // Renamed for clarity
-  const profileDetailsContainer = document.getElementById("profileDetails"); // Renamed for clarity
+  const jobsListContainer = document.getElementById("jobsList");
+  const applicationsListContainer = document.getElementById("applicationsList");
+  const profileDetailsContainer = document.getElementById("profileDetails");
+  const paginationControlsContainer =
+    document.getElementById("paginationControls"); // For Browse Jobs
+  const jobsPerPageSelect = document.getElementById("jobsPerPageSelect");
+  const totalJobsCountSpan = document.getElementById("totalJobsCount");
+
+  const paginationControlsApplicationsContainer = document.getElementById(
+    "paginationControlsApplications"
+  ); // For My Applications
+  const applicationsPerPageSelect = document.getElementById(
+    "applicationsPerPageSelect"
+  ); // New reference
+  const totalApplicationsCountSpan = document.getElementById(
+    "totalApplicationsCount"
+  ); // New reference
+
+  // --- Pagination State Variables ---
+  let currentPage = 1; // For Browse Jobs
+  let currentJobsPerPage = parseInt(jobsPerPageSelect.value);
+
+  let currentApplicationPage = 1; // For My Applications
+  let currentApplicationsPerPage = parseInt(applicationsPerPageSelect.value);
 
   // --- Helper Functions ---
 
@@ -59,7 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("viewJobsBtn").addEventListener("click", (event) => {
     showSection(availableJobsSection, "Available Jobs");
-    loadJobs(); // Call the function to load jobs
+    currentPage = 1; // Reset to first page when browsing jobs
+    loadJobs(currentPage, currentJobsPerPage); // Pass pagination parameters
     setActiveLink(event.currentTarget);
   });
 
@@ -67,14 +89,29 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("myApplicationsBtn")
     .addEventListener("click", (event) => {
       showSection(myApplicationsSection, "My Applications");
-      loadApplications(); // This will now fetch and display applications
+      currentApplicationPage = 1; // Reset to first page when viewing applications
+      loadApplications(currentApplicationPage, currentApplicationsPerPage); // Pass pagination parameters
       setActiveLink(event.currentTarget);
     });
 
   document.getElementById("profileBtn").addEventListener("click", (event) => {
     showSection(profileSection, "My Profile");
-    loadProfile(); // Load profile when this section is active
+    loadProfile();
     setActiveLink(event.currentTarget);
+  });
+
+  // Event listener for "Jobs per page" select dropdown
+  jobsPerPageSelect.addEventListener("change", (event) => {
+    currentJobsPerPage = parseInt(event.target.value);
+    currentPage = 1; // Reset to first page when items per page changes
+    loadJobs(currentPage, currentJobsPerPage);
+  });
+
+  // Event listener for "Applications per page" select dropdown
+  applicationsPerPageSelect.addEventListener("change", (event) => {
+    currentApplicationsPerPage = parseInt(event.target.value);
+    currentApplicationPage = 1; // Reset to first page when items per page changes
+    loadApplications(currentApplicationPage, currentApplicationsPerPage);
   });
 
   // --- Initial Load ---
@@ -84,20 +121,29 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Function Implementations ---
 
   /**
-   * Fetches and displays all available job listings.
+   * Fetches and displays all available job listings with pagination.
+   * @param {number} page - The current page number to fetch.
+   * @param {number} limit - The number of jobs per page.
    */
-  async function loadJobs() {
-    jobsListContainer.innerHTML = `<p>Loading available jobs...</p>`; // Show loading message
-    jobsListContainer.classList.add("jobs-grid"); // Apply grid styling
+  async function loadJobs(page, limit) {
+    jobsListContainer.innerHTML = `<p>Loading available jobs...</p>`;
+    jobsListContainer.classList.add("jobs-grid");
     applicationsListContainer.classList.remove("jobs-grid"); // Ensure other grid is removed
 
+    // Clear previous pagination controls and total count for jobs section
+    paginationControlsContainer.innerHTML = "";
+    totalJobsCountSpan.innerText = "Total Jobs: Loading...";
+
     try {
-      const response = await fetch("/user/getJobs", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `/user/getJobs?page=${page}&limit=${limit}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -127,21 +173,67 @@ document.addEventListener("DOMContentLoaded", () => {
             jobsListContainer.appendChild(jobCard);
           });
           addJobActionListeners(); // Attach listeners to newly created buttons
+          renderJobsPaginationControls(
+            data.currentPage,
+            data.totalPages,
+            data.totalJobs
+          ); // Render pagination controls
+          totalJobsCountSpan.innerText = `Total Jobs: ${data.totalJobs}`; // Update total jobs count
         } else {
           jobsListContainer.innerHTML =
             "<p>No jobs available at the moment. Please check back later!</p>";
+          paginationControlsContainer.innerHTML = ""; // Clear controls if no jobs
+          totalJobsCountSpan.innerText = "Total Jobs: 0";
         }
       } else {
         jobsListContainer.innerHTML = `<p>Error: ${
           data.message || "Failed to load jobs."
         }</p>`;
         alert("Error: " + (data.message || "Failed to load available jobs."));
+        totalJobsCountSpan.innerText = "Total Jobs: Error";
       }
     } catch (error) {
       console.error("Error fetching jobs:", error);
       jobsListContainer.innerHTML = `<p>An error occurred while fetching jobs.</p>`;
       alert("An error occurred while fetching jobs.");
+      totalJobsCountSpan.innerText = "Total Jobs: Error";
     }
+  }
+
+  /**
+   * Renders the pagination controls for job listings.
+   * @param {number} currentPageData - The current active page from API response.
+   * @param {number} totalPagesData - The total number of available pages from API response.
+   * @param {number} totalJobsData - The total number of jobs from API response.
+   */
+  function renderJobsPaginationControls(
+    currentPageData,
+    totalPagesData,
+    totalJobsData
+  ) {
+    paginationControlsContainer.innerHTML = ""; // Clear existing controls
+
+    const prevButton = document.createElement("button");
+    prevButton.innerText = "Previous";
+    prevButton.disabled = currentPageData === 1;
+    prevButton.addEventListener("click", () => {
+      currentPage = currentPageData - 1; // Update global currentPage
+      loadJobs(currentPage, currentJobsPerPage);
+    });
+    paginationControlsContainer.appendChild(prevButton);
+
+    const pageInfo = document.createElement("span");
+    pageInfo.innerText = `Page ${currentPageData} of ${totalPagesData}`;
+    paginationControlsContainer.appendChild(pageInfo);
+
+    const nextButton = document.createElement("button");
+    nextButton.innerText = "Next";
+    nextButton.disabled = currentPageData === totalPagesData;
+    nextButton.addEventListener("click", () => {
+      currentPage = currentPageData + 1; // Update global currentPage
+      loadJobs(currentPage, currentJobsPerPage);
+    });
+    paginationControlsContainer.appendChild(nextButton);
   }
 
   /**
@@ -184,6 +276,13 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.innerText = "Applied";
             e.target.classList.remove("apply-job-btn");
             e.target.classList.add("applied-btn");
+            // After applying, refresh My Applications list if currently viewed
+            if (myApplicationsSection.classList.contains("active")) {
+              loadApplications(
+                currentApplicationPage,
+                currentApplicationsPerPage
+              );
+            }
           } else {
             alert(
               "Error applying: " + (data.message || "Failed to apply for job.")
@@ -198,20 +297,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * Fetches and displays job applications for the current job seeker.
+   * Fetches and displays job applications for the current job seeker with pagination.
+   * @param {number} page - The current page number to fetch.
+   * @param {number} limit - The number of applications per page.
    */
-  async function loadApplications() {
+  async function loadApplications(page, limit) {
     applicationsListContainer.innerHTML = `<p>Loading your applications...</p>`;
     applicationsListContainer.classList.add("jobs-grid"); // Apply grid styling for applications
     jobsListContainer.classList.remove("jobs-grid"); // Ensure other grid is removed
 
+    // Clear pagination controls and total count for applications section
+    paginationControlsContainer.innerHTML = ""; // Clear jobs pagination
+    totalJobsCountSpan.innerText = ""; // Clear jobs total count
+    paginationControlsApplicationsContainer.innerHTML = ""; // Clear previous applications pagination
+    totalApplicationsCountSpan.innerText = "Total Applications: Loading...";
+
     try {
-      const response = await fetch("/user/my-applications", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `/user/my-applications?page=${page}&limit=${limit}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -240,9 +350,17 @@ document.addEventListener("DOMContentLoaded", () => {
             applicationsListContainer.appendChild(applicationCard);
           });
           addViewJobDetailsListeners(); // Attach listeners for new buttons
+          renderApplicationsPaginationControls(
+            data.currentPage,
+            data.totalPages,
+            data.totalApplications
+          ); // Render pagination controls
+          totalApplicationsCountSpan.innerText = `Total Applications: ${data.totalApplications}`; // Update total applications count
         } else {
           applicationsListContainer.innerHTML =
             "<p>You haven't submitted any applications yet.</p>";
+          paginationControlsApplicationsContainer.innerHTML = ""; // Clear controls if no apps
+          totalApplicationsCountSpan.innerText = "Total Applications: 0";
         }
       } else {
         applicationsListContainer.innerHTML = `<p>Error: ${
@@ -251,12 +369,50 @@ document.addEventListener("DOMContentLoaded", () => {
         alert(
           "Error: " + (data.message || "Failed to load your applications.")
         );
+        totalApplicationsCountSpan.innerText = "Total Applications: Error";
       }
     } catch (error) {
       console.error("Error fetching applications:", error);
       applicationsListContainer.innerHTML = `<p>An error occurred while fetching your applications.</p>`;
       alert("An error occurred while fetching your applications.");
+      totalApplicationsCountSpan.innerText = "Total Applications: Error";
     }
+  }
+
+  /**
+   * Renders the pagination controls for job applications.
+   * @param {number} currentPageData - The current active page from API response.
+   * @param {number} totalPagesData - The total number of available pages from API response.
+   * @param {number} totalApplicationsData - The total number of applications from API response.
+   */
+  function renderApplicationsPaginationControls(
+    currentPageData,
+    totalPagesData,
+    totalApplicationsData
+  ) {
+    paginationControlsApplicationsContainer.innerHTML = ""; // Clear existing controls
+
+    const prevButton = document.createElement("button");
+    prevButton.innerText = "Previous";
+    prevButton.disabled = currentPageData === 1;
+    prevButton.addEventListener("click", () => {
+      currentApplicationPage = currentPageData - 1; // Update global currentApplicationPage
+      loadApplications(currentApplicationPage, currentApplicationsPerPage);
+    });
+    paginationControlsApplicationsContainer.appendChild(prevButton);
+
+    const pageInfo = document.createElement("span");
+    pageInfo.innerText = `Page ${currentPageData} of ${totalPagesData}`;
+    paginationControlsApplicationsContainer.appendChild(pageInfo);
+
+    const nextButton = document.createElement("button");
+    nextButton.innerText = "Next";
+    nextButton.disabled = currentPageData === totalPagesData;
+    nextButton.addEventListener("click", () => {
+      currentApplicationPage = currentPageData + 1; // Update global currentApplicationPage
+      loadApplications(currentApplicationPage, currentApplicationsPerPage);
+    });
+    paginationControlsApplicationsContainer.appendChild(nextButton);
   }
 
   /**
@@ -293,6 +449,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Remove grid classes from other containers when profile is loaded
     jobsListContainer.classList.remove("jobs-grid");
     applicationsListContainer.classList.remove("jobs-grid");
+    paginationControlsContainer.innerHTML = ""; // Hide pagination for profile section
+    totalJobsCountSpan.innerText = ""; // Clear total jobs count for this section
+    paginationControlsApplicationsContainer.innerHTML = ""; // Hide applications pagination
+    totalApplicationsCountSpan.innerText = ""; // Clear applications total count
 
     try {
       // Fetch user profile data
@@ -396,4 +556,4 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeUploadForm.dataset.listenerAttached = "true"; // Mark listener as attached
     }
   }
-}); // End of DOMContentLoaded
+});
