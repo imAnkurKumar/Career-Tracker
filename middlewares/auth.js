@@ -5,6 +5,10 @@ require("dotenv").config();
 const SECRET_KEY = process.env.TOKEN_SECRET;
 
 const authenticateToken = (req, res, next) => {
+  if (!SECRET_KEY) {
+    console.error("TOKEN_SECRET is not defined. Please check your .env file.");
+    return res.status(500).json({ message: "Server configuration error." });
+  }
   // Get token from header
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Format: "Bearer TOKEN"

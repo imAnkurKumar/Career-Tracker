@@ -25,9 +25,15 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    salary: {
-      type: String,
-      trim: true,
+    minSalary: {
+      // New field for minimum salary
+      type: Number,
+      default: 0, // Default to 0 if not provided
+    },
+    maxSalary: {
+      // New field for maximum salary
+      type: Number,
+      default: 0, // Default to 0 if not provided
     },
     type: {
       type: String,

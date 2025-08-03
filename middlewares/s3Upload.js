@@ -1,6 +1,5 @@
 // middleware/s3Upload.js
 const { S3Client } = require("@aws-sdk/client-s3");
-const { Upload } = require("@aws-sdk/lib-storage"); // Note: Upload might not be directly used here but client-s3 is
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 require("dotenv").config(); // Load environment variables

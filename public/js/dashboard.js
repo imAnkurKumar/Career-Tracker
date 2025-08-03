@@ -31,17 +31,32 @@ document.addEventListener("DOMContentLoaded", () => {
   ); // For My Applications
   const applicationsPerPageSelect = document.getElementById(
     "applicationsPerPageSelect"
-  ); // New reference
+  );
   const totalApplicationsCountSpan = document.getElementById(
     "totalApplicationsCount"
-  ); // New reference
+  );
 
-  // --- Pagination State Variables ---
+  // Filter input references
+  const searchInput = document.getElementById("searchInput");
+  const locationInput = document.getElementById("locationInput");
+  const jobTypeFilter = document.getElementById("jobTypeFilter");
+  const minSalaryInput = document.getElementById("minSalaryInput");
+  const maxSalaryInput = document.getElementById("maxSalaryInput");
+  const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+
+  // --- Pagination & Filter State Variables ---
   let currentPage = 1; // For Browse Jobs
-  let currentJobsPerPage = parseInt(jobsPerPageSelect.value);
+  let currentJobsPerPage = parseInt(jobsPerPageSelect.value); // Initialize from select value
 
   let currentApplicationPage = 1; // For My Applications
-  let currentApplicationsPerPage = parseInt(applicationsPerPageSelect.value);
+  let currentApplicationsPerPage = parseInt(applicationsPerPageSelect.value); // Initialize from select value
+
+  // Store current filter values
+  let currentSearch = "";
+  let currentLocation = "";
+  let currentJobType = "All";
+  let currentMinSalary = "";
+  let currentMaxSalary = "";
 
   // --- Helper Functions ---
 
@@ -81,7 +96,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("viewJobsBtn").addEventListener("click", (event) => {
     showSection(availableJobsSection, "Available Jobs");
     currentPage = 1; // Reset to first page when browsing jobs
-    loadJobs(currentPage, currentJobsPerPage); // Pass pagination parameters
+    // Load jobs with current filter settings
+    loadJobs(
+      currentPage,
+      currentJobsPerPage,
+      currentSearch,
+      currentLocation,
+      currentJobType,
+      currentMinSalary,
+      currentMaxSalary
+    );
     setActiveLink(event.currentTarget);
   });
 
@@ -104,7 +128,15 @@ document.addEventListener("DOMContentLoaded", () => {
   jobsPerPageSelect.addEventListener("change", (event) => {
     currentJobsPerPage = parseInt(event.target.value);
     currentPage = 1; // Reset to first page when items per page changes
-    loadJobs(currentPage, currentJobsPerPage);
+    loadJobs(
+      currentPage,
+      currentJobsPerPage,
+      currentSearch,
+      currentLocation,
+      currentJobType,
+      currentMinSalary,
+      currentMaxSalary
+    );
   });
 
   // Event listener for "Applications per page" select dropdown
@@ -114,6 +146,25 @@ document.addEventListener("DOMContentLoaded", () => {
     loadApplications(currentApplicationPage, currentApplicationsPerPage);
   });
 
+  // Event listener for Apply Filters button
+  applyFiltersBtn.addEventListener("click", () => {
+    currentSearch = searchInput.value.trim();
+    currentLocation = locationInput.value.trim();
+    currentJobType = jobTypeFilter.value;
+    currentMinSalary = minSalaryInput.value.trim();
+    currentMaxSalary = maxSalaryInput.value.trim();
+    currentPage = 1; // Reset to first page on new filter
+    loadJobs(
+      currentPage,
+      currentJobsPerPage,
+      currentSearch,
+      currentLocation,
+      currentJobType,
+      currentMinSalary,
+      currentMaxSalary
+    );
+  });
+
   // --- Initial Load ---
   // Default to showing the "Browse Jobs" section on page load
   document.getElementById("viewJobsBtn").click();
@@ -121,11 +172,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Function Implementations ---
 
   /**
-   * Fetches and displays all available job listings with pagination.
+   * Fetches and displays all available job listings with pagination and filters.
    * @param {number} page - The current page number to fetch.
    * @param {number} limit - The number of jobs per page.
+   * @param {string} search - Keyword for search.
+   * @param {string} location - Location filter.
+   * @param {string} type - Job type filter.
+   * @param {string} minSalary - Minimum salary filter.
+   * @param {string} maxSalary - Maximum salary filter.
    */
-  async function loadJobs(page, limit) {
+  async function loadJobs(
+    page,
+    limit,
+    search,
+    location,
+    type,
+    minSalary,
+    maxSalary
+  ) {
     jobsListContainer.innerHTML = `<p>Loading available jobs...</p>`;
     jobsListContainer.classList.add("jobs-grid");
     applicationsListContainer.classList.remove("jobs-grid"); // Ensure other grid is removed
@@ -135,15 +199,22 @@ document.addEventListener("DOMContentLoaded", () => {
     totalJobsCountSpan.innerText = "Total Jobs: Loading...";
 
     try {
-      const response = await fetch(
-        `/user/getJobs?page=${page}&limit=${limit}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      // Build query string with all parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append("page", page);
+      queryParams.append("limit", limit);
+      if (search) queryParams.append("search", search);
+      if (location) queryParams.append("location", location);
+      if (type && type !== "All") queryParams.append("type", type);
+      if (minSalary) queryParams.append("minSalary", minSalary);
+      if (maxSalary) queryParams.append("maxSalary", maxSalary);
+
+      const response = await fetch(`/user/getJobs?${queryParams.toString()}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -158,7 +229,11 @@ document.addEventListener("DOMContentLoaded", () => {
               <p><strong>Company:</strong> ${job.company}</p>
               <p><strong>Location:</strong> ${job.location}</p>
               <p><strong>Type:</strong> ${job.type}</p>
-              <p><strong>Salary:</strong> ${job.salary || "N/A"}</p>
+              <p><strong>Salary:</strong> ${
+                job.minSalary > 0 || job.maxSalary > 0
+                  ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                  : "N/A"
+              }</p>
               <p><strong>Description:</strong> ${job.description}</p>
               <p><strong>Requirements:</strong> ${job.requirements}</p>
               <p class="posted-date">Posted on: ${new Date(
@@ -181,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
           totalJobsCountSpan.innerText = `Total Jobs: ${data.totalJobs}`; // Update total jobs count
         } else {
           jobsListContainer.innerHTML =
-            "<p>No jobs available at the moment. Please check back later!</p>";
+            "<p>No jobs available matching your criteria.</p>"; // Updated message
           paginationControlsContainer.innerHTML = ""; // Clear controls if no jobs
           totalJobsCountSpan.innerText = "Total Jobs: 0";
         }
@@ -218,7 +293,15 @@ document.addEventListener("DOMContentLoaded", () => {
     prevButton.disabled = currentPageData === 1;
     prevButton.addEventListener("click", () => {
       currentPage = currentPageData - 1; // Update global currentPage
-      loadJobs(currentPage, currentJobsPerPage);
+      loadJobs(
+        currentPage,
+        currentJobsPerPage,
+        currentSearch,
+        currentLocation,
+        currentJobType,
+        currentMinSalary,
+        currentMaxSalary
+      ); // Pass filters
     });
     paginationControlsContainer.appendChild(prevButton);
 
@@ -231,7 +314,15 @@ document.addEventListener("DOMContentLoaded", () => {
     nextButton.disabled = currentPageData === totalPagesData;
     nextButton.addEventListener("click", () => {
       currentPage = currentPageData + 1; // Update global currentPage
-      loadJobs(currentPage, currentJobsPerPage);
+      loadJobs(
+        currentPage,
+        currentJobsPerPage,
+        currentSearch,
+        currentLocation,
+        currentJobType,
+        currentMinSalary,
+        currentMaxSalary
+      ); // Pass filters
     });
     paginationControlsContainer.appendChild(nextButton);
   }
@@ -556,4 +647,4 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeUploadForm.dataset.listenerAttached = "true"; // Mark listener as attached
     }
   }
-});
+}); // End of DOMContentLoaded

@@ -21,16 +21,62 @@ const getLoginPage = (req, res, next) => {
 
 const getJobs = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 10; // Default to 10 jobs per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const jobs = await Job.find()
-      .sort({ postedAt: -1 }) // Sort by newest first
+    // --- Filtering Parameters ---
+    const { search, location, type, minSalary, maxSalary } = req.query;
+    const query = {}; // Initialize an empty query object
+
+    // Keyword search (title, description, requirements, company)
+    if (search) {
+      const searchRegex = new RegExp(search, "i"); // Case-insensitive regex
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { requirements: searchRegex },
+        { company: searchRegex },
+      ];
+    }
+
+    // Location filter
+    if (location) {
+      query.location = new RegExp(location, "i");
+    }
+
+    // Type filter (e.g., Full-time, Part-time)
+    if (type && type !== "All") {
+      // 'All' option will mean no filter
+      query.type = type;
+    }
+
+    // Robust Salary range filter (now that salary is numeric)
+    if (minSalary || maxSalary) {
+      query.$and = query.$and || []; // Ensure $and array exists
+
+      if (minSalary) {
+        const parsedMinSalary = parseFloat(minSalary);
+        if (!isNaN(parsedMinSalary)) {
+          // Find jobs where the job's maxSalary is >= the filter's minSalary
+          query.$and.push({ maxSalary: { $gte: parsedMinSalary } });
+        }
+      }
+      if (maxSalary) {
+        const parsedMaxSalary = parseFloat(maxSalary);
+        if (!isNaN(parsedMaxSalary)) {
+          // Find jobs where the job's minSalary is <= the filter's maxSalary
+          query.$and.push({ minSalary: { $lte: parsedMaxSalary } });
+        }
+      }
+    }
+
+    const jobs = await Job.find(query) // Apply filters here
+      .sort({ postedAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalJobs = await Job.countDocuments(); // Get total count of all jobs
+    const totalJobs = await Job.countDocuments(query); // Count documents matching the filters
     const totalPages = Math.ceil(totalJobs / limit);
 
     res.status(200).json({
@@ -152,21 +198,21 @@ const applyForJob = async (req, res, next) => {
 
 const getMyApplications = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 10; // Default to 10 applications per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const jobSeekerId = req.user._id; // Get job seeker ID from authenticated token
+    const jobSeekerId = req.user._id;
 
     const applications = await Application.find({ jobSeeker: jobSeekerId })
-      .populate("job") // Populate the job details
-      .sort({ appliedAt: -1 }) // Sort by most recent application
+      .populate("job")
+      .sort({ appliedAt: -1 })
       .skip(skip)
       .limit(limit);
 
     const totalApplications = await Application.countDocuments({
       jobSeeker: jobSeekerId,
-    }); // Get total count of user's applications
+    });
     const totalPages = Math.ceil(totalApplications / limit);
 
     res.status(200).json({
@@ -190,8 +236,8 @@ const uploadResume = async (req, res, next) => {
       return res.status(400).json({ message: "No file uploaded." });
     }
 
-    const userId = req.user._id; // Get user ID from authenticated token
-    const resumeUrl = req.file.location; // S3 URL provided by multer-s3
+    const userId = req.user._id;
+    const resumeUrl = req.file.location;
 
     // Find the user and update their resumeUrl
     const user = await User.findByIdAndUpdate(
@@ -222,8 +268,8 @@ const uploadResume = async (req, res, next) => {
 
 const getUserProfile = async (req, res, next) => {
   try {
-    const userId = req.user._id; // Get user ID from authenticated token
-    const user = await User.findById(userId).select("-password"); // Exclude password from the response
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User profile not found." });
@@ -244,7 +290,7 @@ module.exports = {
   getLandingPage,
   postUserSignUp,
   postUserLogin,
-  getJobs,
+  getJobs, // Now handles filtering
   applyForJob,
   getMyApplications,
   uploadResume,

@@ -98,9 +98,10 @@ const postJob = async (req, res, next) => {
       location,
       description,
       requirements,
-      salary,
+      minSalary,
+      maxSalary,
       type,
-    } = req.body;
+    } = req.body; // Updated to minSalary, maxSalary
 
     const postedBy = req.user.userId;
 
@@ -117,13 +118,18 @@ const postJob = async (req, res, next) => {
         .json({ message: "Please fill in all required fields." });
     }
 
+    // Parse salaries to numbers, default to 0 if not provided or invalid
+    const parsedMinSalary = parseFloat(minSalary) || 0;
+    const parsedMaxSalary = parseFloat(maxSalary) || 0;
+
     const newJob = new Job({
       title,
       company,
       location,
       description,
       requirements,
-      salary,
+      minSalary: parsedMinSalary, // Save as number
+      maxSalary: parsedMaxSalary, // Save as number
       type,
       postedBy,
     });
@@ -190,9 +196,11 @@ const getApplicantsForJob = async (req, res, next) => {
       return res.status(404).json({ message: "Job not found." });
     }
     if (job.postedBy.toString() !== recruiterId) {
-      return res.status(403).json({
-        message: "You are not authorized to view applicants for this job.",
-      });
+      return res
+        .status(403)
+        .json({
+          message: "You are not authorized to view applicants for this job.",
+        });
     }
 
     const applications = await Application.find({ job: jobId })
@@ -242,18 +250,22 @@ const updateApplicationStatus = async (req, res, next) => {
     }
 
     if (application.job.postedBy.toString() !== recruiterId) {
-      return res.status(403).json({
-        message: "You are not authorized to update this application.",
-      });
+      return res
+        .status(403)
+        .json({
+          message: "You are not authorized to update this application.",
+        });
     }
 
     application.status = status;
     await application.save();
 
-    res.status(200).json({
-      message: "Application status updated successfully!",
-      application,
-    });
+    res
+      .status(200)
+      .json({
+        message: "Application status updated successfully!",
+        application,
+      });
   } catch (err) {
     console.error("Error updating application status:", err);
     res
@@ -272,9 +284,10 @@ const editJob = async (req, res, next) => {
       location,
       description,
       requirements,
-      salary,
+      minSalary,
+      maxSalary,
       type,
-    } = req.body;
+    } = req.body; // Updated to minSalary, maxSalary
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -294,7 +307,8 @@ const editJob = async (req, res, next) => {
     job.location = location || job.location;
     job.description = description || job.description;
     job.requirements = requirements || job.requirements;
-    job.salary = salary || job.salary;
+    job.minSalary = parseFloat(minSalary) || 0; // Save as number
+    job.maxSalary = parseFloat(maxSalary) || 0; // Save as number
     job.type = type || job.type;
 
     await job.save();

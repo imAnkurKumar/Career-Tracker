@@ -139,19 +139,54 @@ body {
 /* New: Top controls for pagination/filtering */
 .controls-top {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* Stack search/filters above pagination/total */
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--medium-gray);
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
-  gap: 10px; /* Space between items */
+  gap: 15px; /* Space between filter row and pagination row */
+}
+
+.search-filters {
+  display: flex;
+  flex-wrap: wrap; /* Allow filters to wrap */
+  gap: 10px; /* Space between filter inputs */
+  align-items: center;
+  justify-content: flex-start; /* Align to start */
+}
+
+.search-filters input[type="text"],
+.search-filters input[type="number"],
+.search-filters select {
+  padding: 8px 12px;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.95rem;
+  flex: 1; /* Allow inputs to grow */
+  min-width: 120px; /* Minimum width for inputs */
+  max-width: 200px; /* Max width for inputs */
+}
+
+.search-filters button {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.3s ease;
+}
+
+.search-filters button:hover {
+  background-color: var(--hover-light);
 }
 
 .items-per-page-control {
   display: flex;
+  justify-content: flex-end; /* Align to right */
   align-items: center;
   gap: 8px;
+  width: 100%; /* Take full width to push to right */
 }
 
 .items-per-page-control label {
@@ -512,6 +547,14 @@ body {
   }
   .pagination-controls button {
     padding: 6px 10px;
+  }
+
+  .search-filters input[type="text"],
+  .search-filters input[type="number"],
+  .search-filters select,
+  .search-filters button {
+    flex: 1 1 100%; /* Make filter items take full width on small screens */
+    max-width: unset; /* Remove max-width constraint */
   }
 }
 
