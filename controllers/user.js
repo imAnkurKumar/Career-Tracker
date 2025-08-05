@@ -24,6 +24,7 @@ const getJobs = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const jobSeekerId = req.user._id;
 
     // --- Filtering Parameters ---
     const { search, location, type, minSalary, maxSalary } = req.query;
@@ -79,13 +80,29 @@ const getJobs = async (req, res, next) => {
     const jobs = await Job.find(query)
       .sort({ postedAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     const totalJobs = await Job.countDocuments(query);
     const totalPages = Math.ceil(totalJobs / limit);
 
+    // Check application status for each job
+    const applications = await Application.find({
+      jobSeeker: jobSeekerId,
+      job: { $in: jobs.map((job) => job._id) },
+    });
+
+    const appliedJobIds = new Set(
+      applications.map((app) => app.job.toString())
+    );
+
+    const jobsWithStatus = jobs.map((job) => ({
+      ...job,
+      applied: appliedJobIds.has(job._id.toString()),
+    }));
+
     res.status(200).json({
-      jobs,
+      jobs: jobsWithStatus,
       currentPage: page,
       totalPages,
       totalJobs,

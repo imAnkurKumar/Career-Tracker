@@ -5,6 +5,10 @@
   box-sizing: border-box;
 }
 
+.hidden {
+  display: none !important;
+}
+
 :root {
   /* Aligned with job seeker dashboard colors */
   --primary-blue: #4a90e2;
@@ -164,9 +168,6 @@ body {
 .dashboard-section:not(.hidden):hover {
   box-shadow: var(--shadow-medium); /* Consistent hover shadow */
   transform: translateY(-2px); /* Consistent transform */
-}
-.dashboard-section.hidden {
-  display: none !important;
 }
 
 .form-container {
@@ -342,9 +343,6 @@ body {
 .back-button:hover {
   background-color: var(--hover-light); /* Consistent hover */
   transform: translateY(-2px);
-}
-.back-button.hidden {
-  display: none !important;
 }
 
 /* Application Status Colors */

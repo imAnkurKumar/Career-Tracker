@@ -100,10 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (backButton) {
     if (!backButton.dataset.listenerAttached) {
       backButton.addEventListener("click", () => {
-        console.log("Back button clicked. Returning to My Posted Jobs.");
-        jobListingsContainer.style.display = "block"; // Show job listings
-        applicantsListContainer.style.display = "none"; // Hide applicants container
-        backButton.style.display = "none"; // Hide back button
+        jobListingsContainer.classList.remove("hidden"); // Show job listings
+        applicantsListContainer.classList.add("hidden"); // Hide applicants container
+        backButton.classList.add("hidden"); // Hide back button
         sectionTitle.innerText = "My Posted Jobs"; // Reset title on back
         loadMyPostedJobs(); // Reload the job list to ensure counts are updated if needed
       });
@@ -135,13 +134,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxSalary = document.getElementById("maxJobSalary").value.trim();
     const type = document.getElementById("jobType").value;
 
-    // Basic validation (now redundant with HTML 'required' but good fallback)
     if (!title || !company || !location || !description || !requirements) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    // Optional: Basic salary validation
     if (
       minSalary &&
       maxSalary &&
@@ -164,8 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
           location,
           description,
           requirements,
-          minSalary: minSalary ? parseFloat(minSalary) : 0, // Send as number, default 0
-          maxSalary: maxSalary ? parseFloat(maxSalary) : 0, // Send as number, default 0
+          minSalary: minSalary ? parseFloat(minSalary) : 0,
+          maxSalary: maxSalary ? parseFloat(maxSalary) : 0,
           type,
         }),
       });
@@ -174,8 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         alert(data.message);
-        document.getElementById("postJobForm").reset(); // Clear form
-        document.getElementById("myPostedJobsBtn").click(); // Navigate to "My Posted Jobs"
+        document.getElementById("postJobForm").reset();
+        document.getElementById("myPostedJobsBtn").click();
       } else {
         alert("Error: " + (data.message || "Failed to post job."));
       }
@@ -189,17 +186,14 @@ document.addEventListener("DOMContentLoaded", () => {
    * Fetches and displays jobs posted by the current recruiter.
    */
   async function loadMyPostedJobs() {
-    // Show job listings container, hide applicants container and back button
-    jobListingsContainer.style.display = "block";
-    applicantsListContainer.style.display = "none";
-    backButton.style.display = "none"; // Ensure back button is hidden here
+    jobListingsContainer.classList.remove("hidden");
+    applicantsListContainer.classList.add("hidden");
+    backButton.classList.add("hidden");
 
-    // Add the jobs-grid class to the container
     jobListingsContainer.classList.add("jobs-grid");
-    // Remove applicants-grid class if it was previously added
     applicantsListContainer.classList.remove("applicants-grid");
 
-    jobListingsContainer.innerHTML = `<p>Fetching your posted jobs...</p>`; // Show loading message
+    jobListingsContainer.innerHTML = `<p>Fetching your posted jobs...</p>`;
 
     try {
       const response = await fetch("/recruiter/my-jobs", {
@@ -213,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         if (data.jobs && data.jobs.length > 0) {
-          jobListingsContainer.innerHTML = ""; // Clear loading message
+          jobListingsContainer.innerHTML = "";
           data.jobs.forEach((job) => {
             const jobCard = document.createElement("div");
             jobCard.classList.add("job-card");
@@ -250,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             jobListingsContainer.appendChild(jobCard);
           });
-          addJobActionListeners(); // Attach listeners to new job cards
+          addJobActionListeners();
         } else {
           jobListingsContainer.innerHTML = `<div>You haven't posted any jobs yet.</div>`;
         }
@@ -275,7 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
         const jobTitle = e.target.dataset.jobTitle;
-        // Store current job details for potential re-load after status update
         currentViewedJobId = jobId;
         currentViewedJobTitle = jobTitle;
         loadApplicantsForJob(jobId, jobTitle);
@@ -285,7 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".edit-job-btn").forEach((button) => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
-        // Call a function to load the edit form for this job
         loadEditJobForm(jobId);
       });
     });
@@ -308,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             if (response.ok) {
               alert(data.message);
-              loadMyPostedJobs(); // Refresh the list after deletion
+              loadMyPostedJobs();
             } else {
               alert(
                 "Error deleting job: " + (data.message || "Unknown error.")
@@ -328,7 +320,6 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {string} jobId - The ID of the job to edit.
    */
   async function loadEditJobForm(jobId) {
-    // First, fetch the job details to pre-fill the form
     try {
       const response = await fetch(`/recruiter/my-jobs/${jobId}`, {
         method: "GET",
@@ -348,31 +339,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const job = data.job;
 
-      // Show the post job section (re-using its HTML structure)
       showSection(postJobSection, `Edit Job: ${job.title}`);
-      setActiveLink(document.getElementById("postJobBtn")); // Highlight "Post Job" as we're using its form
+      setActiveLink(document.getElementById("postJobBtn"));
 
-      // Populate the form fields with current job data
       document.getElementById("jobTitle").value = job.title;
       document.getElementById("companyName").value = job.company;
       document.getElementById("jobLocation").value = job.location;
       document.getElementById("jobDescription").value = job.description;
       document.getElementById("jobRequirements").value = job.requirements;
       document.getElementById("minJobSalary").value =
-        job.minSalary > 0 ? job.minSalary : ""; // Populate new salary fields
+        job.minSalary > 0 ? job.minSalary : "";
       document.getElementById("maxJobSalary").value =
-        job.maxSalary > 0 ? job.maxSalary : ""; // Populate new salary fields
+        job.maxSalary > 0 ? job.maxSalary : "";
       document.getElementById("jobType").value = job.type;
 
-      // Change the form's submit button text and add a data attribute for the job ID
       const postJobForm = document.getElementById("postJobForm");
       const submitButton = postJobForm.querySelector('button[type="submit"]');
       submitButton.innerText = "Save Changes";
-      submitButton.dataset.jobId = jobId; // Store job ID on the button
+      submitButton.dataset.jobId = jobId;
 
-      // Change the form's event listener to handle update instead of post
-      postJobForm.removeEventListener("submit", handlePostJob); // Remove old listener
-      postJobForm.addEventListener("submit", handleUpdateJob); // Add new listener for update
+      postJobForm.removeEventListener("submit", handlePostJob);
+      postJobForm.addEventListener("submit", handleUpdateJob);
     } catch (error) {
       console.error("Error loading edit job form:", error);
       alert("An error occurred while loading the edit form.");
@@ -387,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleUpdateJob(event) {
     event.preventDefault();
 
-    const jobId = event.submitter.dataset.jobId; // Get job ID from the submit button's data attribute
+    const jobId = event.submitter.dataset.jobId;
 
     const title = document.getElementById("jobTitle").value.trim();
     const company = document.getElementById("companyName").value.trim();
@@ -405,7 +392,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Optional: Basic salary validation
     if (
       minSalary &&
       maxSalary &&
@@ -417,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const response = await fetch(`/recruiter/jobs/${jobId}`, {
-        method: "PATCH", // Use PATCH for updating
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -428,8 +414,8 @@ document.addEventListener("DOMContentLoaded", () => {
           location,
           description,
           requirements,
-          minSalary: minSalary ? parseFloat(minSalary) : 0, // Send as number
-          maxSalary: maxSalary ? parseFloat(maxSalary) : 0, // Send as number
+          minSalary: minSalary ? parseFloat(minSalary) : 0,
+          maxSalary: maxSalary ? parseFloat(maxSalary) : 0,
           type,
         }),
       });
@@ -438,15 +424,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         alert(data.message);
-        // Reset form to original "Post Job" state
         document.getElementById("postJobForm").reset();
         const submitButton = document
           .getElementById("postJobForm")
           .querySelector('button[type="submit"]');
         submitButton.innerText = "🚀 Post Job";
-        delete submitButton.dataset.jobId; // Remove job ID from button
+        delete submitButton.dataset.jobId;
 
-        // Re-attach original handlePostJob listener
         document
           .getElementById("postJobForm")
           .removeEventListener("submit", handleUpdateJob);
@@ -454,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .getElementById("postJobForm")
           .addEventListener("submit", handlePostJob);
 
-        document.getElementById("myPostedJobsBtn").click(); // Go back to my posted jobs
+        document.getElementById("myPostedJobsBtn").click();
       } else {
         alert("Error updating job: " + (data.message || "Unknown error."));
       }
@@ -470,19 +454,15 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {string} jobTitle - The title of the job for display purposes.
    */
   async function loadApplicantsForJob(jobId, jobTitle) {
-    // Hide job listings and show applicants container and back button
-    jobListingsContainer.style.display = "none";
-    applicantsListContainer.style.display = "block";
-    backButton.style.display = "block"; // Ensure back button is shown
+    jobListingsContainer.classList.add("hidden");
+    applicantsListContainer.classList.remove("hidden");
+    backButton.classList.remove("hidden");
 
-    // Remove jobs-grid class from jobListingsContainer when hiding it
     jobListingsContainer.classList.remove("jobs-grid");
-    // Add applicants-grid class to the applicants container
     applicantsListContainer.classList.add("applicants-grid");
 
-    sectionTitle.innerText = `Applicants for "${jobTitle}"`; // Update main title
-
-    applicantsListContainer.innerHTML = `<p>Loading applicants...</p>`; // Show loading message
+    sectionTitle.innerText = `Applicants for "${jobTitle}"`;
+    applicantsListContainer.innerHTML = `<p>Loading applicants...</p>`;
 
     try {
       const response = await fetch(`/recruiter/jobs/${jobId}/applicants`, {
@@ -496,12 +476,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         if (data.applicants && data.applicants.length > 0) {
-          applicantsListContainer.innerHTML = ""; // Clear loading message
+          applicantsListContainer.innerHTML = "";
           data.applicants.forEach((app) => {
             const applicantCard = document.createElement("div");
             applicantCard.classList.add("applicant-card");
-            // Add data-job-id to applicant card for easier reference during status update
-            applicantCard.dataset.jobId = jobId; // Set job ID on the applicant card
+            applicantCard.dataset.jobId = jobId;
             applicantCard.innerHTML = `
               <h3>${app.jobSeeker.name}</h3>
               <p><strong>Email:</strong> ${app.jobSeeker.email}</p>
@@ -521,7 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             applicantsListContainer.appendChild(applicantCard);
           });
-          addApplicantActionListeners(); // Attach listeners for applicant actions
+          addApplicantActionListeners();
         } else {
           applicantsListContainer.innerHTML =
             "<p>No applicants for this job yet.</p>";
@@ -546,10 +525,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".update-status-btn").forEach((button) => {
       button.addEventListener("click", async (e) => {
         const applicationId = e.target.dataset.applicationId;
-        const currentStatus = e.target.dataset.currentStatus; // Corrected: Use dataset.currentStatus
-        const parentJobId = e.target.closest(".applicant-card").dataset.jobId; // Get job ID from parent card
+        const currentStatus = e.target.dataset.currentStatus;
+        const parentJobId = e.target.closest(".applicant-card").dataset.jobId;
 
-        // Prompt for new status
         const newStatus = prompt(
           `Current status: ${currentStatus}\nEnter new status (Pending, Reviewed, Interviewed, Rejected, Hired):`
         );
@@ -590,8 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (response.ok) {
             alert(data.message);
-            // Re-load the specific applicants list to reflect the change
-            loadApplicantsForJob(parentJobId, currentViewedJobTitle); // Use parentJobId for robustness
+            loadApplicantsForJob(parentJobId, currentViewedJobTitle);
           } else {
             alert(
               "Error updating status: " +

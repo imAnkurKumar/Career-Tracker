@@ -187,7 +187,7 @@ const getJobById = async (req, res, next) => {
 
 const getApplicantsForJob = async (req, res, next) => {
   try {
-    const jobId = req.params.jobId; // Corrected from req.params.job
+    const { jobId } = req.params; // Corrected from req.params.job
     const recruiterId = req.user.userId;
 
     const job = await Job.findById(jobId);

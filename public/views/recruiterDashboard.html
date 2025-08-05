@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Recruiter Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap"
       rel="stylesheet" />
@@ -12,7 +11,6 @@
   </head>
   <body>
     <div class="dashboard-container">
-      <!-- Sidebar -->
       <nav class="sidebar">
         <div class="logo">Hirely</div>
         <div class="sidebar-nav">
@@ -24,12 +22,10 @@
           <button id="recruiterLogoutBtn" class="logout-btn">⏻ Logout</button>
         </div>
       </nav>
-      <!-- Main -->
       <main class="main-content">
         <h1 id="sectionTitle">Post New Job</h1>
 
-        <!-- Post Job Section -->
-        <section class="dashboard-section hidden" id="postJobSection">
+        <section class="dashboard-section" id="postJobSection">
           <form id="postJobForm" class="form-container">
             <div class="input-group">
               <label for="jobTitle">Job Title</label>
@@ -101,7 +97,6 @@
           </form>
         </section>
 
-        <!-- My Posted Jobs Section -->
         <section class="dashboard-section hidden" id="myPostedJobsSection">
           <button id="backToJobsBtn" class="back-button hidden">← Back</button>
           <div id="jobListingsContainer" class="jobs-grid"></div>
@@ -110,7 +105,6 @@
             class="applicants-grid hidden"></div>
         </section>
 
-        <!-- Profile Section -->
         <section class="dashboard-section hidden" id="recruiterProfileSection">
           <div id="recruiterProfileDetails">
             Your recruiter profile details will appear here.

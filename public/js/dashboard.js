@@ -258,9 +258,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 job.postedAt
               ).toLocaleDateString()}</p>
               <div class="job-actions">
-                <button class="apply-job-btn" data-job-id="${
-                  job._id
-                }">Apply Now</button>
+                <button class="apply-job-btn" data-job-id="${job._id}" ${
+              job.applied ? "disabled" : ""
+            }>
+                  ${job.applied ? "Applied" : "Apply Now"}
+                </button>
               </div>
             `;
             jobsListContainer.appendChild(jobCard);
@@ -349,60 +351,63 @@ document.addEventListener("DOMContentLoaded", () => {
    * Attaches event listeners to action buttons on job cards (e.g., Apply Now).
    */
   function addJobActionListeners() {
-    document.querySelectorAll(".apply-job-btn").forEach((button) => {
-      button.addEventListener("click", async (e) => {
-        const jobId = e.target.dataset.jobId;
-        const token = localStorage.getItem("token");
+    document
+      .querySelectorAll(".apply-job-btn:not(:disabled)")
+      .forEach((button) => {
+        button.addEventListener("click", async (e) => {
+          const jobId = e.target.dataset.jobId;
+          const token = localStorage.getItem("token");
 
-        if (!token) {
-          alert("You must be logged in to apply for a job.");
-          window.location.href = "/login";
-          return;
-        }
+          if (!token) {
+            alert("You must be logged in to apply for a job.");
+            window.location.href = "/login";
+            return;
+          }
 
-        const confirmApply = confirm(
-          "Are you sure you want to apply for this job?"
-        );
-        if (!confirmApply) {
-          return;
-        }
+          const confirmApply = confirm(
+            "Are you sure you want to apply for this job?"
+          );
+          if (!confirmApply) {
+            return;
+          }
 
-        try {
-          const response = await fetch("/user/apply-job", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ jobId }),
-          });
+          try {
+            const response = await fetch("/user/apply-job", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ jobId }),
+            });
 
-          const data = await response.json();
+            const data = await response.json();
 
-          if (response.ok) {
-            alert(data.message);
-            e.target.disabled = true;
-            e.target.innerText = "Applied";
-            e.target.classList.remove("apply-job-btn");
-            e.target.classList.add("applied-btn");
-            // After applying, refresh My Applications list if currently viewed
-            if (myApplicationsSection.classList.contains("active")) {
-              loadApplications(
-                currentApplicationPage,
-                currentApplicationsPerPage
+            if (response.ok) {
+              alert(data.message);
+              e.target.disabled = true;
+              e.target.innerText = "Applied";
+              e.target.classList.remove("apply-job-btn");
+              e.target.classList.add("applied-btn");
+              // After applying, refresh My Applications list if currently viewed
+              if (myApplicationsSection.classList.contains("active")) {
+                loadApplications(
+                  currentApplicationPage,
+                  currentApplicationsPerPage
+                );
+              }
+            } else {
+              alert(
+                "Error applying: " +
+                  (data.message || "Failed to apply for job.")
               );
             }
-          } else {
-            alert(
-              "Error applying: " + (data.message || "Failed to apply for job.")
-            );
+          } catch (error) {
+            console.error("Error applying for job:", error);
+            alert("An error occurred while applying for the job.");
           }
-        } catch (error) {
-          console.error("Error applying for job:", error);
-          alert("An error occurred while applying for the job.");
-        }
+        });
       });
-    });
   }
 
   /**
