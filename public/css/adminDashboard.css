@@ -1,0 +1,131 @@
+/* ... (existing styles for stats and user table remain) ... */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background-color: var(--white);
+  padding: 20px;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-light);
+  text-align: center;
+}
+
+.stat-card h3 {
+  margin-bottom: 10px;
+  color: var(--dark-blue);
+}
+
+.stat-card p {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+#usersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#usersTable th,
+#usersTable td {
+  padding: 12px;
+  border: 1px solid var(--medium-gray);
+  text-align: left;
+}
+
+#usersTable th {
+  background-color: var(--dark-blue);
+  color: var(--white);
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+/* --- NEW STYLES FOR JOB MANAGEMENT --- */
+
+.admin-jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.admin-job-card {
+  background-color: var(--white);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-light);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-left: 4px solid var(--primary-blue);
+}
+
+.admin-job-card h3 {
+  margin: 0 0 10px 0;
+  color: var(--dark-blue);
+}
+
+.admin-job-card p {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  margin-bottom: 8px;
+}
+
+.admin-job-card .job-meta {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--light-gray);
+}
+
+.admin-job-card .job-actions {
+  margin-top: 15px;
+  text-align: right;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid var(--medium-gray);
+}
+
+.pagination-controls button {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.pagination-controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls span {
+  font-weight: 600;
+}

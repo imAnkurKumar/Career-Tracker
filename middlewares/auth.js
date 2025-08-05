@@ -29,4 +29,15 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-module.exports = authenticateToken;
+const isAdmin = (req, res, next) => {
+  // Assumes authenticateToken has been called first
+  if (req.user && req.user.role === "admin") {
+    next();
+  } else {
+    return res
+      .status(403)
+      .json({ message: "Access denied. Requires admin role." });
+  }
+};
+
+module.exports = { authenticateToken, isAdmin };

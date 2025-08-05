@@ -7,6 +7,8 @@ require("dotenv").config();
 
 const userRoutes = require("./routers/user");
 const recruitersRoutes = require("./routers/recrutiters");
+const adminRoutes = require("./routers/admin"); // Import admin routes
+
 const app = express();
 
 mongoose.set("strictQuery", true);
@@ -20,6 +22,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", userRoutes);
 app.use("/user", userRoutes);
 app.use("/recruiter", recruitersRoutes);
+app.use("/admin", adminRoutes); // Use admin routes
 
 mongoose
   .connect(process.env.MONGODB_URI)

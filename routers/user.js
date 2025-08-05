@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("../controllers/user");
-const authenticateToken = require("../middlewares/auth");
+// FIX: Destructure the imported module to get the authenticateToken function
+const { authenticateToken } = require("../middlewares/auth");
 const uploadResume = require("../middlewares/s3Upload");
 
 router.use(express.static("public"));

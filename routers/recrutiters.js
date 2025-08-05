@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const recruitersController = require("../controllers/recruiters");
-const authenticateToken = require("../middlewares/auth");
+// FIX: Destructure the imported module to get the authenticateToken function
+const { authenticateToken } = require("../middlewares/auth");
 
 router.use(express.static("public"));
 
@@ -11,7 +12,11 @@ router.get("/login", recruitersController.getLoginPage);
 router.post("/signUp", recruitersController.signUp);
 router.post("/login", recruitersController.login);
 
-router.get("/dashboard", recruitersController.getRecruiterDashboard);
+router.get(
+  "/dashboard",
+  authenticateToken,
+  recruitersController.getRecruiterDashboard
+);
 
 router.post("/jobs", authenticateToken, recruitersController.postJob);
 router.get("/my-jobs", authenticateToken, recruitersController.getMyPostedJobs);

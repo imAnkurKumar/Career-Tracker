@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - CareerTrack</title>
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/adminDashboard.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="logo">Admin Panel</div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="#" id="dashboardBtn" class="active">📊 Dashboard</a>
+            </li>
+            <li><a href="#" id="usersBtn">👥 Users</a></li>
+            <li><a href="#" id="jobsBtn">📋 Jobs</a></li>
+            <li><a href="#" id="logoutBtn">🚪 Logout</a></li>
+          </ul>
+        </nav>
+      </aside>
+      <main class="main-content">
+        <h1 id="sectionTitle">Dashboard</h1>
+        <div id="dashboardContent">
+          <!-- ... (stats and users sections remain the same) ... -->
+          <section id="statsSection" class="dashboard-section">
+            <h2>Platform Stats</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <h3>Total Users</h3>
+                <p id="totalUsers">Loading...</p>
+              </div>
+              <div class="stat-card">
+                <h3>Total Jobs</h3>
+                <p id="totalJobs">Loading...</p>
+              </div>
+              <div class="stat-card">
+                <h3>Total Applications</h3>
+                <p id="totalApplications">Loading...</p>
+              </div>
+            </div>
+          </section>
+          <section id="usersSection" class="dashboard-section hidden">
+            <h2>User Management</h2>
+            <div class="table-container">
+              <table id="usersTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+          <!-- Job Management Section -->
+          <section id="jobsSection" class="dashboard-section hidden">
+            <h2>Job Management</h2>
+            <!-- FIX: Replaced table with a grid container -->
+            <div id="jobsGridContainer" class="admin-jobs-grid">
+              <!-- Job cards will be inserted here -->
+            </div>
+            <!-- FIX: Added pagination controls container -->
+            <div id="jobsPaginationControls" class="pagination-controls"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script src="../js/adminDashboard.js"></script>
+  </body>
+</html>
