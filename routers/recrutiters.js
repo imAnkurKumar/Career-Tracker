@@ -39,4 +39,11 @@ router.delete(
   recruitersController.deleteJob
 );
 
+// New route to get recruiter profile, protected by authentication
+router.get(
+  "/profile",
+  authenticateToken,
+  recruitersController.getRecruiterProfile
+);
+
 module.exports = router;

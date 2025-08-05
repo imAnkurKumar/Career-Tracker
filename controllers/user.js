@@ -187,12 +187,10 @@ const applyForJob = async (req, res, next) => {
     job.applicants.push(jobSeekerId);
     await job.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Application submitted successfully!",
-        application: newApplication,
-      });
+    res.status(201).json({
+      message: "Application submitted successfully!",
+      application: newApplication,
+    });
   } catch (err) {
     console.error("Error applying for job:", err);
     res
@@ -288,6 +286,24 @@ const getUserProfile = async (req, res, next) => {
   }
 };
 
+const getJobById = async (req, res, next) => {
+  try {
+    const jobId = req.params.jobId;
+
+    const job = await Job.findById(jobId).select("-applicants");
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    res.status(200).json({ job });
+  } catch (err) {
+    console.error("Error fetching job details:", err);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching job details." });
+  }
+};
+
 module.exports = {
   getSignUpPage,
   getLoginPage,
@@ -299,4 +315,5 @@ module.exports = {
   getMyApplications,
   uploadResume,
   getUserProfile,
+  getJobById,
 };

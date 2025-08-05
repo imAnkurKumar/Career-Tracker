@@ -36,7 +36,6 @@
       <main class="main-content">
         <h1 id="sectionTitle">Welcome to CareerTrack!</h1>
         <div id="dashboardContent">
-          <!-- Available Jobs Section (Default View) -->
           <div id="availableJobsSection" class="dashboard-section active">
             <h2>Available Jobs</h2>
             <div class="controls-top">
@@ -78,15 +77,11 @@
               <span id="totalJobsCount" class="total-count">Total Jobs: 0</span>
             </div>
             <div id="jobsList" class="jobs-grid">
-              <!-- Jobs will be loaded here by JavaScript -->
               <p>Loading available jobs...</p>
             </div>
-            <div id="paginationControls" class="pagination-controls">
-              <!-- Pagination buttons for jobs will be rendered here by JavaScript -->
-            </div>
+            <div id="paginationControls" class="pagination-controls"></div>
           </div>
 
-          <!-- My Applications Section (Initially Hidden) -->
           <div id="myApplicationsSection" class="dashboard-section hidden">
             <h2>My Applications</h2>
             <div class="controls-top">
@@ -104,21 +99,25 @@
               >
             </div>
             <div id="applicationsList" class="jobs-grid">
-              <!-- Applications will be loaded here by JavaScript -->
               <p>Your applications will appear here.</p>
             </div>
             <div
               id="paginationControlsApplications"
-              class="pagination-controls">
-              <!-- Pagination buttons for applications will be rendered here by JavaScript -->
+              class="pagination-controls"></div>
+          </div>
+
+          <div id="jobDetailsSection" class="dashboard-section hidden">
+            <button id="backToApplicationsBtn" class="back-button hidden">
+              ← Back to My Applications
+            </button>
+            <div id="jobDetailsContent">
+              <p>Loading job details...</p>
             </div>
           </div>
 
-          <!-- My Profile Section (Initially Hidden) -->
           <div id="profileSection" class="dashboard-section hidden">
             <h2>My Profile</h2>
             <div id="profileDetails">
-              <!-- Profile details will be loaded here by JavaScript -->
               <p>Loading profile details...</p>
               <div class="profile-card">
                 <h3>Personal Information</h3>

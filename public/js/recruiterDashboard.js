@@ -23,6 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "applicantsListContainer"
   );
   const backButton = document.getElementById("backToJobsBtn");
+  const recruiterProfileDetails = document.getElementById(
+    "recruiterProfileDetails"
+  );
 
   // Store the current job ID and title when viewing applicants
   // This helps when updating status and needing to reload the specific applicant list
@@ -606,9 +609,43 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Loads and displays the recruiter's profile details.
    */
-  function loadRecruiterProfile() {
-    const container = document.getElementById("recruiterProfileDetails");
-    container.innerHTML = `<p>Loading recruiter profile details...</p>`;
-    // TODO: Implement fetching logic here
+  async function loadRecruiterProfile() {
+    recruiterProfileDetails.innerHTML = `<p>Loading recruiter profile details...</p>`;
+
+    try {
+      const response = await fetch("/recruiter/profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const user = data.user;
+        recruiterProfileDetails.innerHTML = `
+          <div class="profile-card">
+            <h3>Recruiter Information</h3>
+            <p><strong>Company Name:</strong> ${user.name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+          </div>
+        `;
+      } else {
+        recruiterProfileDetails.innerHTML = `<p>Error: ${
+          data.message || "Failed to load profile."
+        }</p>`;
+        alert(
+          "Error: " + (data.message || "Failed to load recruiter profile.")
+        );
+      }
+    } catch (error) {
+      console.error(
+        "An error occurred while fetching recruiter profile:",
+        error
+      );
+      recruiterProfileDetails.innerHTML = `<p>An error occurred while fetching recruiter profile.</p>`;
+      alert("An error occurred while fetching recruiter profile.");
+    }
   }
 });

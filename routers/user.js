@@ -32,4 +32,7 @@ router.post(
 // New route for fetching user profile, protected by authentication
 router.get("/profile", authenticateToken, userController.getUserProfile);
 
+// New route to get job details by ID, protected by authentication
+router.get("/jobs/:jobId", authenticateToken, userController.getJobById);
+
 module.exports = router;

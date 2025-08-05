@@ -187,7 +187,7 @@ const getJobById = async (req, res, next) => {
 
 const getApplicantsForJob = async (req, res, next) => {
   try {
-    const jobId = req.params.job; // Typo in original: req.params.jobId
+    const jobId = req.params.jobId; // Corrected from req.params.job
     const recruiterId = req.user.userId;
 
     const job = await Job.findById(jobId);
@@ -195,11 +195,9 @@ const getApplicantsForJob = async (req, res, next) => {
       return res.status(404).json({ message: "Job not found." });
     }
     if (job.postedBy.toString() !== recruiterId) {
-      return res
-        .status(403)
-        .json({
-          message: "You are not authorized to view applicants for this job.",
-        });
+      return res.status(403).json({
+        message: "You are not authorized to view applicants for this job.",
+      });
     }
 
     const applications = await Application.find({ job: jobId })
@@ -249,22 +247,18 @@ const updateApplicationStatus = async (req, res, next) => {
     }
 
     if (application.job.postedBy.toString() !== recruiterId) {
-      return res
-        .status(403)
-        .json({
-          message: "You are not authorized to update this application.",
-        });
+      return res.status(403).json({
+        message: "You are not authorized to update this application.",
+      });
     }
 
     application.status = status;
     await application.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Application status updated successfully!",
-        application,
-      });
+    res.status(200).json({
+      message: "Application status updated successfully!",
+      application,
+    });
   } catch (err) {
     console.error("Error updating application status:", err);
     res
@@ -343,6 +337,22 @@ const deleteJob = async (req, res, next) => {
   }
 };
 
+const getRecruiterProfile = async (req, res, next) => {
+  try {
+    const recruiterId = req.user.userId;
+    const user = await User.findById(recruiterId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "Recruiter profile not found." });
+    }
+
+    res.status(200).json({ user });
+  } catch (err) {
+    console.error("Error fetching recruiter profile:", err);
+    res.status(500).json({ message: "Server error while fetching profile." });
+  }
+};
+
 module.exports = {
   getSignUpPage,
   getLoginPage,
@@ -356,4 +366,5 @@ module.exports = {
   updateApplicationStatus,
   editJob,
   deleteJob,
+  getRecruiterProfile,
 };

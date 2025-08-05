@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "myApplicationsSection"
   );
   const profileSection = document.getElementById("profileSection");
+  const jobDetailsSection = document.getElementById("jobDetailsSection"); // New: Job Details Section
+  const jobDetailsContent = document.getElementById("jobDetailsContent"); // New: Job Details Content
 
   const jobsListContainer = document.getElementById("jobsList");
   const applicationsListContainer = document.getElementById("applicationsList");
@@ -35,6 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalApplicationsCountSpan = document.getElementById(
     "totalApplicationsCount"
   );
+  const backToApplicationsBtn = document.getElementById(
+    "backToApplicationsBtn"
+  ); // New: Back button
 
   // Filter input references
   const searchInput = document.getElementById("searchInput");
@@ -71,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     availableJobsSection.classList.add("hidden");
     myApplicationsSection.classList.add("hidden");
     profileSection.classList.add("hidden");
+    jobDetailsSection.classList.add("hidden"); // New: Hide Job Details section
 
     // Show the target section
     sectionElement.classList.remove("hidden");
@@ -95,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("viewJobsBtn").addEventListener("click", (event) => {
     showSection(availableJobsSection, "Available Jobs");
-    currentPage = 1; // Reset to first page when browsing jobs
+    backToApplicationsBtn.classList.add("hidden"); // Ensure back button is hidden
+    currentPage = 1; // Reset to first page when Browse jobs
     // Load jobs with current filter settings
     loadJobs(
       currentPage,
@@ -113,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("myApplicationsBtn")
     .addEventListener("click", (event) => {
       showSection(myApplicationsSection, "My Applications");
+      backToApplicationsBtn.classList.add("hidden"); // Ensure back button is hidden
       currentApplicationPage = 1; // Reset to first page when viewing applications
       loadApplications(currentApplicationPage, currentApplicationsPerPage); // Pass pagination parameters
       setActiveLink(event.currentTarget);
@@ -120,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("profileBtn").addEventListener("click", (event) => {
     showSection(profileSection, "My Profile");
+    backToApplicationsBtn.classList.add("hidden"); // Ensure back button is hidden
     loadProfile();
     setActiveLink(event.currentTarget);
   });
@@ -164,6 +173,15 @@ document.addEventListener("DOMContentLoaded", () => {
       currentMaxSalary
     );
   });
+
+  // New: Event listener for the "Back to My Applications" button
+  if (backToApplicationsBtn) {
+    backToApplicationsBtn.addEventListener("click", () => {
+      showSection(myApplicationsSection, "My Applications");
+      backToApplicationsBtn.classList.add("hidden"); // Hide the button
+      loadApplications(currentApplicationPage, currentApplicationsPerPage);
+    });
+  }
 
   // --- Initial Load ---
   // Default to showing the "Browse Jobs" section on page load
@@ -396,6 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applicationsListContainer.innerHTML = `<p>Loading your applications...</p>`;
     applicationsListContainer.classList.add("jobs-grid"); // Apply grid styling for applications
     jobsListContainer.classList.remove("jobs-grid"); // Ensure other grid is removed
+    jobDetailsContent.innerHTML = ""; // Clear content if navigating back from job details
 
     // Clear pagination controls and total count for applications section
     paginationControlsContainer.innerHTML = ""; // Clear jobs pagination
@@ -513,11 +532,61 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".view-job-details-btn").forEach((button) => {
       button.addEventListener("click", (e) => {
         const jobId = e.target.dataset.jobId;
-        alert(
-          `Viewing details for Job ID: ${jobId} (Can expand to show full job details in a modal/new section)`
-        );
+        loadJobDetails(jobId);
       });
     });
+  }
+
+  /**
+   * Loads and displays details for a specific job.
+   * @param {string} jobId - The ID of the job to fetch details for.
+   */
+  async function loadJobDetails(jobId) {
+    showSection(jobDetailsSection, "Job Details");
+    backToApplicationsBtn.classList.remove("hidden");
+    jobDetailsContent.innerHTML = `<p>Loading job details...</p>`;
+
+    try {
+      const response = await fetch(`/user/jobs/${jobId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.job) {
+        const job = data.job;
+        jobDetailsContent.innerHTML = `
+          <div class="job-card">
+            <h3>${job.title}</h3>
+            <p><strong>Company:</strong> ${job.company}</p>
+            <p><strong>Location:</strong> ${job.location}</p>
+            <p><strong>Type:</strong> ${job.type}</p>
+            <p><strong>Salary:</strong> ${
+              job.minSalary > 0 || job.maxSalary > 0
+                ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                : "N/A"
+            }</p>
+            <p><strong>Description:</strong> ${job.description}</p>
+            <p><strong>Requirements:</strong> ${job.requirements}</p>
+            <p class="posted-date">Posted on: ${new Date(
+              job.postedAt
+            ).toLocaleDateString()}</p>
+          </div>
+        `;
+      } else {
+        jobDetailsContent.innerHTML = `<p>Error: ${
+          data.message || "Failed to load job details."
+        }</p>`;
+        alert("Error: " + (data.message || "Failed to load job details."));
+      }
+    } catch (error) {
+      console.error("Error fetching job details:", error);
+      jobDetailsContent.innerHTML = `<p>An error occurred while fetching job details.</p>`;
+      alert("An error occurred while fetching job details.");
+    }
   }
 
   /**
@@ -544,6 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
     totalJobsCountSpan.innerText = ""; // Clear total jobs count for this section
     paginationControlsApplicationsContainer.innerHTML = ""; // Hide applications pagination
     totalApplicationsCountSpan.innerText = ""; // Clear applications total count
+    jobDetailsContent.innerHTML = ""; // Clear job details content
 
     try {
       // Fetch user profile data
